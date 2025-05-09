@@ -6,11 +6,11 @@
 /* Global Variables *****************************************************************/
 
 U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE); // Oled Object
-
-Data AllData;
+float  x=1.5;
+int AllData;
 // Struct to store all data initialization
 
-Sensor_Type current_sensor = ToF; // Global Variable to quickly choose Depth Sensor
+int current_sensor = 0; // Global Variable to quickly choose Depth Sensor
 bool measureData = true;          // Flag to measure data
 
 /***************************************************************************/
@@ -50,17 +50,8 @@ char buffer2[10];  // Buffer to hold the converted number
 void setup()
 {
   Serial.begin(9600);
-  /*Intializations*/
-  if (measureData == true)
-  {
-    Sensor_init(current_sensor);
-  }
+
   OLED_init();
-  Setup_Firebase();
-  Setup_Coexistence();
-  ESPNOW_Receiver_Init();
-  GSM_init();
-  GSM_SMS_init();
 
   /*Oled Config*/
   u8g2.setColorIndex(1); // white color
@@ -70,11 +61,7 @@ void setup()
 
 void loop()
 {
-  // Get Sensor Data
-  if (measureData == true)
-  {
-    AllData.water_level_2 = getDepth_Average_cm(current_sensor); // Measure Water Depth at Water Edge
-  }
+
 
   /* Wait to Recieve ESP NOW Data *******************************************************************************/
 
@@ -83,18 +70,10 @@ void loop()
   // while(isRecieved == false) {}
   // isRecieved = false;
 
-  // Control Debug LED
-  if (isRecieved == true)
-  {
-    digitalWrite(ESPNOW_DEBUG_LED, LOW);
-    isRecieved = false;
-  }
+
 
   /************************************************************************************************************/
 
-  // Store Sensor Data in structure
-  AllData.water_level_1 = receivedData.water_level_1;
-  AllData.temp = receivedData.temp;
 
   // AllData.water_level_2 = getDepth_Average_cm(current_sensor); // Measure Water Depth at Water Edge
 
@@ -220,8 +199,9 @@ void loop()
 
     else if (current_screen == 1 && selected == 2)
     {
+
       u8g2.setFont(u8g2_font_helvB08_tr);       // font
-      dtostrf(AllData.temp, 6, 2, temp_buffer); // Width = 6, Precision = 2 decimal places
+      dtostrf(x, 6, 2, temp_buffer); // Width = 6, Precision = 2 decimal places
 
       u8g2.setColorIndex(1); // white color
       u8g2.drawXBMP(0, 0, 128, 64, temp_measurement);
@@ -236,7 +216,7 @@ void loop()
     else if (current_screen == 1 and selected == 0)
     {
       u8g2.setFont(u8g2_font_helvB08_tr);           // font
-      dtostrf(AllData.water_level_1, 6, 2, buffer); // Width = 6, Precision = 2 decimal places
+      dtostrf(x, 6, 2, buffer); // Width = 6, Precision = 2 decimal places
       u8g2.setColorIndex(1);                        // white color
       u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
 
@@ -250,7 +230,7 @@ void loop()
     else if (current_screen == 1 and selected == 1)
     {
       u8g2.setFont(u8g2_font_helvB08_tr);            // font
-      dtostrf(AllData.water_level_2, 6, 2, buffer2); // Width = 6, Precision = 2 decimal places
+      dtostrf(x, 6, 2, buffer2); // Width = 6, Precision = 2 decimal places
       u8g2.setColorIndex(1);                         // white color
       u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
 
@@ -267,54 +247,10 @@ void loop()
 
   /* End of OLED Control********************************************************************************************/
 
-  /* Variables Control ***************************************************************************************/
-  // temp += 0.05; //? Change
-  // if(temp > 40)
-  // {
-  //   temp = 24; //? Change
-  // }
-  if ((temp_progress < 124) && (AllData.temp < 40))
-  {
-    temp_progress = (AllData.temp * 124) / 40;
-  }
-  else
-  {
-    temp_progress = 0;
-  }
 
-  // depth_1 +=0.05; //? Change
-  // if(depth_1 > 20)
-  // {
-  //   depth_1 = 5.5; //? Change
-  // }
-  if (progress < 124 && AllData.water_level_1 < 28)
-  {
-    progress = (AllData.water_level_1 * 124) / 28;
-  }
-  else
-  {
-    // progress = 0;
-  }
-
-  if (progress2 < 124 && AllData.water_level_2 < 28)
-  {
-    progress2 = (AllData.water_level_2 * 124) / 28;
-  }
-  else
-  {
-    // progress2 = 0;
-  }
 
   /* End of Variables Control ***************************************************************************************/
 
   /* Send Data to web server **********************************************************************/
 
-  if (isRecieved == true)
-  {
-    ESPNOW_Receiver_deInit();                                                             // Deinitialize ESP-NOW before sending data to Firebase
-    Send_Firebase_Data(AllData.water_level_1, AllData.temp, AllData.water_level_2, -200); // Send data to Firebase
-    GSM_sendData(AllData.water_level_1, AllData.temp, AllData.water_level_2);             // Send data via GSM
-    ESPNOW_Receiver_Init();                                                               // Reinitialize ESP-NOW after sending data
-    isRecieved = false;                                                                   // Reset the flag after sending data
-  }
 }
