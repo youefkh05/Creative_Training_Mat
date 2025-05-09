@@ -1,8 +1,7 @@
 #include <Arduino.h>
-#include "Water_Level/Water_Level.h"
-#include "OLED/oled.h"
-#include "Firebase_Sender.h"
-#include "GSM/GSM.h"
+//#include "Water_Level.h"
+#include "oled.h"
+//#include "GSM.h"
 
 /* Global Variables *****************************************************************/
 
