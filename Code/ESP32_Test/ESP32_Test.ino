@@ -33,17 +33,17 @@ const unsigned char *menu_icons[n_items] = {
 
 
 char items[n_items][25] = {
-    {"cat cow"},
-    {"child pose"},
-    {"straight leg raises"},
-    {"cross body stretch"},
-    {"piriforms stretch"},
-    {"heel raises"},
-    {"plank"},
-    {"push ups"},
-    {"squats"},
-    {"leg raises"},
-    {"lunges"}};
+    {"1.cat cow"},
+    {"2.child pose"},
+    {"3.straight leg raises"},
+    {"4.cross body stretch"},
+    {"5.piriforms stretch"},
+    {"6.heel raises"},
+    {"7.plank"},
+    {"8.push ups"},
+    {"9.squats"},
+    {"10.leg raises"},
+    {"11.lunges"}};
 
 int previous =0;
 int selected = 1;
@@ -159,6 +159,10 @@ void loop()
   /* OLED Section *******************************************************************************/
   u8g2.setAutoPageClear(1);
   u8g2.firstPage();
+  //Serial
+      Serial.println("Previous: " + String(previous));
+      Serial.println("Selected: " + String(selected));
+      Serial.println("Next: " + String(next));
   do
   {
     if (current_screen == 0)
@@ -178,10 +182,7 @@ void loop()
       u8g2.drawStr(26, 15 + 2 * 22, items[next]);
       u8g2.drawXBMP(4, 2 + 2 * 22, 16, 16, menu_icons[next]);
      
-      //Serial
-      Serial.println("Previous: " + String(previous));
-      Serial.println("Selected: " + String(selected));
-      Serial.println("Next: " + String(next));
+    
 
       // Selection outline
       switch (selected%3)
@@ -234,6 +235,7 @@ void loop()
         u8g2.setColorIndex(1); u8g2.drawBox(2, 16, temp_progress, 6);
       }
     }
+    //delay(100);
   } while (u8g2.nextPage());
 
   u8g2.setAutoPageClear(0);
