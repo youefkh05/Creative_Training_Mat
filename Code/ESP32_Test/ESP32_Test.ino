@@ -19,17 +19,17 @@ bool measureData = true;          // Flag to measure data
 const int n_items = 11;
 
 const unsigned char *menu_icons[n_items] = {
-    menu_icon_waterdrop,
+    amm_bitmap,
     menu_icon_battery,
     menu_icon_temp,
-    menu_icon_waterdrop,
-    menu_icon_battery,
-    menu_icon_temp,
-    menu_icon_waterdrop,
-    menu_icon_battery,
-    menu_icon_temp,
-    menu_icon_waterdrop,
-    menu_icon_battery};
+    bitmap_icon_3dcube,
+    bitmap_icon_dashboard,
+    bitmap_icon_battery,
+    bitmap_icon_fireworks,
+    bitmap_icon_gps_speed,
+    bitmap_icon_knob_over_oled,
+    bitmap_icon_parksensor,
+    bitmap_icon_turbo};
 
 
 char items[n_items][25] = {
@@ -183,23 +183,10 @@ void loop()
       u8g2.drawXBMP(4, 2 + 2 * 22, 16, 16, menu_icons[next]);
      
     
-
       // Selection outline
-      switch (selected%3)
-      {
-        case 0:
-          u8g2.drawXBMP(0, 0, 128, 20, menu_sel_outline);
-          Serial.println("Menu: 0");
-          break;
-        case 1:
-          u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
-          Serial.println("Menu: 1");
-          break;
-        case 2:
-          u8g2.drawXBMP(0, 44, 128, 20, menu_sel_outline);
-          Serial.println("Menu: 2");
-          break;
-      }
+      u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
+      Serial.println(items[selected]);
+
 
       // Scrollbar
       u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
