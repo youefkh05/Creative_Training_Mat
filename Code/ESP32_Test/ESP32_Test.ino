@@ -16,7 +16,7 @@ bool measureData = true;          // Flag to measure data
 /***************************************************************************/
 
 /* Menu Variables ***********************************************************/
-const int n_items = 11;
+const int n_items = 15;
 
 const unsigned char *menu_icons[n_items] = {
     amm_bitmap,
@@ -29,21 +29,29 @@ const unsigned char *menu_icons[n_items] = {
     bitmap_icon_gps_speed,
     bitmap_icon_knob_over_oled,
     bitmap_icon_parksensor,
-    bitmap_icon_turbo};
+    bitmap_icon_turbo,
+    volt_bitmap,
+    ohm_bitmap,
+    sig_gen_bitmap,
+    config_bitmap};
 
 
 char items[n_items][25] = {
-    {"1.cat cow"},
-    {"2.child pose"},
-    {"3.straight leg raises"},
-    {"4.cross body stretch"},
-    {"5.piriforms stretch"},
-    {"6.heel raises"},
-    {"7.plank"},
-    {"8.push ups"},
-    {"9.squats"},
-    {"10.leg raises"},
-    {"11.lunges"}};
+    {"cat cow"},
+    {"child pose"},
+    {"straight leg raises"},
+    {"cross body stretch"},
+    {"piriforms stretch"},
+    {"heel raises"},
+    {"plank"},
+    {"push ups"},
+    {"squats"},
+    {"leg raises"},
+    {"lunges"},
+    {"1extra"},
+    {"2extra"},
+    {"3extra"},
+    {"4extra"},};
 
 int previous =0;
 int selected = 1;
