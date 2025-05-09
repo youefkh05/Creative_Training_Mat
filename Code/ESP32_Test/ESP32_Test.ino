@@ -16,21 +16,38 @@ bool measureData = true;          // Flag to measure data
 /***************************************************************************/
 
 /* Menu Variables ***********************************************************/
+const int n_items = 11;
 
-const unsigned char *menu_icons[3] = {
+const unsigned char *menu_icons[n_items] = {
     menu_icon_waterdrop,
     menu_icon_battery,
-    menu_icon_temp};
+    menu_icon_temp,
+    menu_icon_waterdrop,
+    menu_icon_battery,
+    menu_icon_temp,
+    menu_icon_waterdrop,
+    menu_icon_battery,
+    menu_icon_temp,
+    menu_icon_waterdrop,
+    menu_icon_battery};
 
-const int n_items = 3;
-char items[n_items][20] = {
-    {"Water level 1"},
-    {"Water level 2"},
-    {"Temperature"}};
 
-int previous;
-int selected = 0;
-int next;
+char items[n_items][25] = {
+    {"cat cow"},
+    {"child pose"},
+    {"straight leg raises"},
+    {"cross body stretch"},
+    {"piriforms stretch"},
+    {"heel raises"},
+    {"plank"},
+    {"push ups"},
+    {"squats"},
+    {"leg raises"},
+    {"lunges"}};
+
+int previous =0;
+int selected = 1;
+int next =2;
 int current_screen = 0;
 
 // temp measurements
@@ -49,7 +66,7 @@ char buffer2[10];  // Buffer to hold the converted number
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   OLED_init();
 
@@ -57,25 +74,18 @@ void setup()
   u8g2.setColorIndex(1); // white color
   u8g2.setBitmapMode(1);
   u8g2.begin();
+  Serial.printf("Setup complete\n");
+  delay(10);  
+  Serial.printf("Setup complete\n");
+  delay(10);  
 }
 
 void loop()
 {
 
 
-  /* Wait to Recieve ESP NOW Data *******************************************************************************/
-
-  //! POLLING
-  // Serial.println("Recieveing Data...");
-  // while(isRecieved == false) {}
-  // isRecieved = false;
-
-
-
   /************************************************************************************************************/
-
-
-  // AllData.water_level_2 = getDepth_Average_cm(current_sensor); // Measure Water Depth at Water Edge
+  Serial.println("Loop running...");
 
   /* Button Control ************************************************************************/
   if (current_screen == 0)
@@ -118,17 +128,10 @@ void loop()
       }
     }
 
-    // Control Previous and Next
-    previous = selected - 1;
-    if (previous < 0)
-    {
-      previous = n_items - 1;
-    }
-    next = selected + 1;
-    if (next >= n_items)
-    {
-      next = 0;
-    }
+    // Compute previous and next safely
+    previous = (selected + n_items - 1) % n_items;
+    next = (selected + 1) % n_items;
+
   }
 
   //* Enter Button
@@ -153,7 +156,6 @@ void loop()
     }
   }
   /* End of Buttons ****************************************************************************************/
-
   /* OLED Section *******************************************************************************/
   u8g2.setAutoPageClear(1);
   u8g2.firstPage();
@@ -161,92 +163,81 @@ void loop()
   {
     if (current_screen == 0)
     {
-      // Menu Item 1
       u8g2.setFont(u8g_font_7x14);
-      u8g2.drawStr(26, 15, items[0]);
-      u8g2.drawXBMP(4, 2, 16, 16, menu_icons[0]);
 
-      // Menu Item 2
-      u8g2.setFont(u8g_font_7x14);
-      u8g2.drawStr(26, 37, items[1]);
-      u8g2.drawXBMP(4, 24, 16, 16, menu_icons[1]);
+      // Menu Items with icons
+      //Previous
+      u8g2.drawStr(26, 15 + 0 * 22, items[previous]);
+      u8g2.drawXBMP(4, 2 + 0 * 22, 16, 16, menu_icons[previous]);
 
-      // Menu Item 3
-      u8g2.setFont(u8g_font_7x14);
-      u8g2.drawStr(26, 59, items[2]);
-      u8g2.drawXBMP(4, 46, 16, 16, menu_icons[2]);
+      //Current
+      u8g2.drawStr(26, 15 + 1 * 22, items[selected]);
+      u8g2.drawXBMP(4, 2 + 1 * 22, 16, 16, menu_icons[selected]);
 
-      if (selected == 1)
+      //Next
+      u8g2.drawStr(26, 15 + 2 * 22, items[next]);
+      u8g2.drawXBMP(4, 2 + 2 * 22, 16, 16, menu_icons[next]);
+     
+      //Serial
+      Serial.println("Previous: " + String(previous));
+      Serial.println("Selected: " + String(selected));
+      Serial.println("Next: " + String(next));
+
+      // Selection outline
+      switch (selected%3)
       {
-        u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
+        case 0:
+          u8g2.drawXBMP(0, 0, 128, 20, menu_sel_outline);
+          Serial.println("Menu: 0");
+          break;
+        case 1:
+          u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
+          Serial.println("Menu: 1");
+          break;
+        case 2:
+          u8g2.drawXBMP(0, 44, 128, 20, menu_sel_outline);
+          Serial.println("Menu: 2");
+          break;
       }
 
-      if (selected == 2)
-      {
-        u8g2.drawXBMP(0, 44, 128, 20, menu_sel_outline);
-      }
+      // Scrollbar
+      u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
+      u8g2.drawBox(125, (64 / n_items) * selected + 6, 3, 8);
+    }
+    else if (current_screen == 1)
+    {
+      u8g2.setFont(u8g2_font_helvB08_tr); // consistent font
+      u8g2.setColorIndex(1);              // white text
 
       if (selected == 0)
       {
-        u8g2.drawXBMP(0, 0, 128, 20, menu_sel_outline);
+        dtostrf(x, 6, 2, buffer);
+        u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
+        u8g2.drawStr(25, 55, buffer);
+        u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
+        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, progress, 6);
       }
-
-      u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
-
-      // draw scrollbar handle
-      u8g2.drawBox(125, 64 / n_items * selected + 6, 3, 8);
+      else if (selected == 1)
+      {
+        dtostrf(x, 6, 2, buffer2);
+        u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
+        u8g2.drawStr(25, 55, buffer2);
+        u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
+        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, progress2, 6);
+      }
+      else if (selected == 2)
+      {
+        dtostrf(x, 6, 2, temp_buffer);
+        u8g2.drawXBMP(0, 0, 128, 64, temp_measurement);
+        u8g2.drawStr(25, 55, temp_buffer);
+        u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
+        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, temp_progress, 6);
+      }
     }
-
-    else if (current_screen == 1 && selected == 2)
-    {
-
-      u8g2.setFont(u8g2_font_helvB08_tr);       // font
-      dtostrf(x, 6, 2, temp_buffer); // Width = 6, Precision = 2 decimal places
-
-      u8g2.setColorIndex(1); // white color
-      u8g2.drawXBMP(0, 0, 128, 64, temp_measurement);
-
-      u8g2.drawStr(25, 55, temp_buffer);
-
-      u8g2.setColorIndex(0);
-      u8g2.drawBox(2, 15, 124, 8);
-      u8g2.setColorIndex(1);
-      u8g2.drawBox(2, 16, temp_progress, 6);
-    }
-    else if (current_screen == 1 and selected == 0)
-    {
-      u8g2.setFont(u8g2_font_helvB08_tr);           // font
-      dtostrf(x, 6, 2, buffer); // Width = 6, Precision = 2 decimal places
-      u8g2.setColorIndex(1);                        // white color
-      u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
-
-      u8g2.drawStr(25, 55, buffer);
-
-      u8g2.setColorIndex(0);
-      u8g2.drawBox(2, 15, 124, 8);
-      u8g2.setColorIndex(1);
-      u8g2.drawBox(2, 16, progress, 6);
-    }
-    else if (current_screen == 1 and selected == 1)
-    {
-      u8g2.setFont(u8g2_font_helvB08_tr);            // font
-      dtostrf(x, 6, 2, buffer2); // Width = 6, Precision = 2 decimal places
-      u8g2.setColorIndex(1);                         // white color
-      u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
-
-      u8g2.drawStr(25, 55, buffer2);
-
-      u8g2.setColorIndex(0);
-      u8g2.drawBox(2, 15, 124, 8);
-      u8g2.setColorIndex(1);
-      u8g2.drawBox(2, 16, progress2, 6);
-    }
-
   } while (u8g2.nextPage());
+
   u8g2.setAutoPageClear(0);
-
-  /* End of OLED Control********************************************************************************************/
-
+  /* End of OLED Control ***********************************************************************/
 
 
   /* End of Variables Control ***************************************************************************************/
