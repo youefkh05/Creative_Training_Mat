@@ -1,17 +1,17 @@
 #include "mat.h"
 
-
 // Pin Definitions
-const int BUTTONS[] = {0, 1, 2, 3, A0};  // B1-B5 (HIGH when pressed)
-// 0 → Head, 1 → Right Hand, 2 → Left Hnad, 3 → Right Leg, 4 → Left Leg
+const int BUTTONS[] = {2, 3, 4, 5, 6, 7};  // B1-B6 (LOW when pressed)
+// 0 → LEFT_HAND, 1 → RIGHT_HAND, 2 → LEFT_KNEE, 3 → RIGHT_KNEE, 4 → LEFT_LEG 5 →RIGHT_LEG
+  
 
-const int ALL_LEDS[] = {4,5,6,7,8, 9,10,11,12,13}; // [0-4]=Green, [5-9]=Red
+const int ALL_LEDS[] = {9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}; // [0-5]=Green, [6-12]=Red
 
 #define RED(i) ((i) + RED_OFFSET)
 // Exercise sequences for each program
 const int PROGRAMS[TRAININGS][MAX_STEPS] = {
-  {RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE),RED(RIGHT_KNEE), RED(LEFT_LEG),  (LEFT_HAND),  (RIGHT_HAND),  (LEFT_KNEE), (RIGHT_KNEE),  (LEFT_LEG),-1},  // Program 0: Cat Cow
-  {2, 2, 3, 4, RED(1), 1, RED(4), 4, RED(1), RED(4)},  // Program 0: Cat Cow
+  {RED(RIGHT_HAND), RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), RED(LEFT_HAND), RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, 4, RED(1), RED(4)},  // Program 0: Cat Cow
+  {1, 2, 3, 4, RED(1), 1, RED(4), 4, RED(1), RED(4)},  // Program 0: Cat Cow
   {1, 2+RED_OFFSET, 1, 3, -1},  // Program 1: Step 2 uses red
   {4+RED_OFFSET, 3, 2, -1, -1}  // Program 2: Step 0 uses red
 };
@@ -28,6 +28,7 @@ unsigned long lastBlinkTime = 0;
 bool ledState = false;
 unsigned long errorStartTime = 0;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
+
 
 #ifdef DEBUG
 void printState() {
@@ -106,6 +107,7 @@ void resetLedSolid(int step, bool oppos) {
 }
 
 void resetAllLEDs() {
+  ledState = false;
   for (int i = 0; i < MAX_LEDS*2; i++) {
     digitalWrite(ALL_LEDS[i], LOW);
   }
@@ -226,6 +228,7 @@ void handleWaitForHold(unsigned long currentTime) {
 
 void handleVerifyNext() {
   delay(HOLD_DURATION);
+
   // Verify next button is still in correct state
   bool nextButtonOk = (nextStep >= RED_OFFSET)
     ? (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == HIGH)
@@ -291,7 +294,6 @@ void mat_checkerror() {
   }
 }
 
-
 // ========================
 // Core Functions
 // ========================
@@ -315,19 +317,19 @@ void setProgram(int programIndex) {
     currentState = IDLE;     // Start in idle
     preStep = -1;
     nextStep = -1;
-    
-    // Validate program index
-    currentProgram = constrain(programIndex, 0, TRAININGS-1);
-    programStep = 0;
-    currentStep = PROGRAMS[currentProgram][0];
-    
-    totalSteps = 0;
-    while (totalSteps < MAX_STEPS && PROGRAMS[programIndex][totalSteps] != -1) {
-        totalSteps++;
-    }
-    
-    resetAllLEDs();
-    currentState = BLINK_TARGET;
+
+  // Validate program index
+  currentProgram = constrain(programIndex, 0, TRAININGS-1);
+  programStep = 0;
+  currentStep = PROGRAMS[currentProgram][0];
+  
+  totalSteps = 0;
+  while (totalSteps < MAX_STEPS && PROGRAMS[programIndex][totalSteps] != -1) {
+    totalSteps++;
+  }
+  
+  resetAllLEDs();
+  currentState = BLINK_TARGET;
 }
 
 void celebrateCompletion() {
