@@ -74,7 +74,7 @@ char buffer2[10];  // Buffer to hold the converted number
 
 void setup()
 {
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
   OLED_init();
 
@@ -82,9 +82,9 @@ void setup()
   u8g2.setColorIndex(1); // white color
   u8g2.setBitmapMode(1);
   u8g2.begin();
-  Serial.printf("Setup complete\n");
+  //Serial.printf("Setup complete\n");
   delay(10);  
-  Serial.printf("Setup complete\n");
+  //Serial.printf("Setup complete\n");
   delay(10);  
 }
 
@@ -93,7 +93,7 @@ void loop()
 
 
   /************************************************************************************************************/
-  Serial.println("Loop running...");
+  //Serial.println("Loop running...");
 
   /* Button Control ************************************************************************/
   if (current_screen == 0)
@@ -110,7 +110,7 @@ void loop()
           selected = n_items - 1;
         }
       }
-      Serial.println("Up Button Pressed");
+      //Serial.println("Up Button Pressed");
       while (digitalRead(OLED_BUTTON_UP_PIN) == LOW)
       {
         // Wait for Button Release
@@ -167,10 +167,10 @@ void loop()
   /* OLED Section *******************************************************************************/
   u8g2.setAutoPageClear(1);
   u8g2.firstPage();
-  //Serial
-      Serial.println("Previous: " + String(previous));
-      Serial.println("Selected: " + String(selected));
-      Serial.println("Next: " + String(next));
+  ////Serial
+      //Serial.println("Previous: " + String(previous));
+      //Serial.println("Selected: " + String(selected));
+      //Serial.println("Next: " + String(next));
   do
   {
     if (current_screen == 0)
@@ -193,7 +193,7 @@ void loop()
     
       // Selection outline
       u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
-      Serial.println(items[selected]);
+      //Serial.println(items[selected]);
 
 
       // Scrollbar

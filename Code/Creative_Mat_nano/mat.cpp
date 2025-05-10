@@ -10,8 +10,8 @@ const int ALL_LEDS[] = {4,5,6,7,8, 9,10,11,12,13}; // [0-4]=Green, [5-9]=Red
 #define RED(i) ((i) + RED_OFFSET)
 // Exercise sequences for each program
 const int PROGRAMS[TRAININGS][MAX_STEPS] = {
-  {RED(RIGHT_HAND), RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), RED(LEFT_HAND), RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, 4, RED(1), RED(4)},  // Program 0: Cat Cow
-  {1, 2, 3, 4, RED(1), 1, RED(4), 4, RED(1), RED(4)},  // Program 0: Cat Cow
+  {RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE),RED(RIGHT_KNEE), RED(LEFT_LEG), RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE),RED(RIGHT_KNEE), RED(LEFT_LEG)},  // Program 0: Cat Cow
+  {2, 2, 3, 4, RED(1), 1, RED(4), 4, RED(1), RED(4)},  // Program 0: Cat Cow
   {1, 2+RED_OFFSET, 1, 3, -1},  // Program 1: Step 2 uses red
   {4+RED_OFFSET, 3, 2, -1, -1}  // Program 2: Step 0 uses red
 };
@@ -26,9 +26,9 @@ int currentStep = PROGRAMS[currentProgram][0];
 int nextStep = -1;
 unsigned long lastBlinkTime = 0;
 bool ledState = false;
+bool check_error = false;
 unsigned long errorStartTime = 0;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
-
 
 #ifdef DEBUG
 void printState() {
@@ -107,6 +107,7 @@ void resetLedSolid(int step, bool oppos) {
 }
 
 void resetAllLEDs() {
+  ledState = false;
   for (int i = 0; i < MAX_LEDS*2; i++) {
     digitalWrite(ALL_LEDS[i], LOW);
   }
@@ -225,9 +226,9 @@ void handleWaitForHold(unsigned long currentTime) {
   }
 }
 
-void handleVerifyNext() {
+void handleVerifyNext(bool &check) {
   delay(HOLD_DURATION);
-
+  check = true;
   // Verify next button is still in correct state
   bool nextButtonOk = (nextStep >= RED_OFFSET)
     ? (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == HIGH)
@@ -247,39 +248,41 @@ void handleError(unsigned long currentTime) {
   }
 }
 
-void mat_checkerror() {
-  for (int i = 0; i < programStep; ++i) {
-    int step = PROGRAMS[currentProgram][i];
-    int position = i;
-    int buttonIndex = step % MAX_LEDS;
-    bool expectedState = (step >= RED_OFFSET) ? HIGH : LOW; // Red = released, Green = pressed
-    bool actualState = digitalRead(BUTTONS[buttonIndex]);
-    resetLedSolid(step, LOW);
+void mat_checkerror(bool &check) {
+    if(check==true){
+        for (int i = 0; i < programStep; ++i) {
+            int step = PROGRAMS[currentProgram][i];
+            int position = i;
+            int buttonIndex = step % MAX_LEDS;
+            bool expectedState = (step >= RED_OFFSET) ? HIGH : LOW; // Red = released, Green = pressed
+            bool actualState = digitalRead(BUTTONS[buttonIndex]);
+            resetLedSolid(step, LOW);
 
-    // Loop through upcoming steps to check if the same button is pressed/released
-    for (int j = i + 1; j < programStep; ++j) {
-      int nextStep = PROGRAMS[currentProgram][j];
-      int nextButtonIndex = nextStep % MAX_LEDS;
-      
-      // If the same button is involved and the next step is either pressed or released
-      if (nextButtonIndex == buttonIndex) {
-        expectedState = (nextStep >= RED_OFFSET) ? HIGH : LOW;
-        position = j;
-      }
-    }
+            // Loop through upcoming steps to check if the same button is pressed/released
+            for (int j = i + 1; j < programStep; ++j) {
+            int nextStep = PROGRAMS[currentProgram][j];
+            int nextButtonIndex = nextStep % MAX_LEDS;
+            
+            // If the same button is involved and the next step is either pressed or released
+            if (nextButtonIndex == buttonIndex) {
+                expectedState = (nextStep >= RED_OFFSET) ? HIGH : LOW;
+                position = j;
+            }
+            }
 
-    // If the current state does not match the expected state, raise an error
-    if (actualState != expectedState) {
-      int nextindex = currentStep %MAX_LEDS;
-      if(nextindex != buttonIndex){  
-        programStep = position;
-        currentStep = step;
-        currentState = BLINK_TARGET;
-        resetAllLEDs();
-        return;
-      }
+            // If the current state does not match the expected state, raise an error
+            if (actualState != expectedState) {
+            int nextindex = currentStep %MAX_LEDS;
+            if(nextindex != buttonIndex){  
+                programStep = position;
+                currentStep = step;
+                currentState = BLINK_TARGET;
+                resetAllLEDs();
+                return;
+            }
+            }
+        }
     }
-  }
 }
 
 
@@ -295,6 +298,7 @@ void advanceStep() {
     celebrateCompletion();
     currentProgram = (currentProgram + 1) % TRAININGS;
     currentState = IDLE;
+    check_error = false;
     return;
   }
 
@@ -303,18 +307,23 @@ void advanceStep() {
 }
 
 void setProgram(int programIndex) {
-  // Validate program index
-  currentProgram = constrain(programIndex, 0, TRAININGS-1);
-  programStep = 0;
-  currentStep = PROGRAMS[currentProgram][0];
-  
-  totalSteps = 0;
-  while (totalSteps < MAX_STEPS && PROGRAMS[programIndex][totalSteps] != -1) {
-    totalSteps++;
-  }
-  
-  resetAllLEDs();
-  currentState = BLINK_TARGET;
+    currentState = IDLE;     // Start in idle
+    preStep = -1;
+    nextStep = -1;
+    check_error = false;
+    
+    // Validate program index
+    currentProgram = constrain(programIndex, 0, TRAININGS-1);
+    programStep = 0;
+    currentStep = PROGRAMS[currentProgram][0];
+    
+    totalSteps = 0;
+    while (totalSteps < MAX_STEPS && PROGRAMS[programIndex][totalSteps] != -1) {
+        totalSteps++;
+    }
+    
+    resetAllLEDs();
+    currentState = BLINK_TARGET;
 }
 
 void celebrateCompletion() {

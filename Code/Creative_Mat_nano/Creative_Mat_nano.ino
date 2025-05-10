@@ -14,11 +14,11 @@ void loop() {
     case IDLE:        handleIdle(); break;
     case BLINK_TARGET: handleBlinkTarget(currentTime); break;
     case WAIT_FOR_HOLD: handleWaitForHold(currentTime); break;
-    case VERIFY_NEXT: handleVerifyNext(); break;
+    case VERIFY_NEXT: handleVerifyNext(check_error); break;
     case ERROR:       handleError(currentTime); break;
   }
   
-  mat_checkerror();
+  mat_checkerror(check_error);
 
   #ifdef DEBUG
     printState();

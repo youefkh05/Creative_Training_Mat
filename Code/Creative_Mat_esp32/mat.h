@@ -30,9 +30,9 @@ enum BodyPart {
 // ========================
 // 1. Define Training Programs
 // ========================
-#define TRAININGS  13  // Number of available programs
+#define TRAININGS  15  // Number of available programs
 #define MAX_STEPS  15  // Maximum steps per program
-#define MAX_LEDS   5  // Number of physical LEDs per color
+#define MAX_LEDS   6  // Number of physical LEDs per color
 #define RED_OFFSET MAX_LEDS  // Red LEDs start at index MAX_LEDS
 
 // Add debounce constants

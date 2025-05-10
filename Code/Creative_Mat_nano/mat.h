@@ -31,7 +31,7 @@ enum BodyPart {
 // 1. Define Training Programs
 // ========================
 #define TRAININGS  13  // Number of available programs
-#define MAX_STEPS  15  // Maximum steps per program
+#define MAX_STEPS  11  // Maximum steps per program
 #define MAX_LEDS   5  // Number of physical LEDs per color
 #define RED_OFFSET MAX_LEDS  // Red LEDs start at index MAX_LEDS
 
@@ -58,6 +58,7 @@ extern int currentStep;
 extern int nextStep;
 extern unsigned long lastBlinkTime;
 extern bool ledState;
+extern bool check_error;
 extern unsigned long errorStartTime;
 extern bool buttonStates[MAX_LEDS];
 
@@ -76,9 +77,9 @@ bool isButtonPressed(int buttonIndex);
 void handleIdle();
 void handleBlinkTarget(unsigned long currentTime);
 void handleWaitForHold(unsigned long currentTime);
-void handleVerifyNext();
+void handleVerifyNext(bool &check);
 void handleError(unsigned long currentTime);
-void mat_checkerror();
+void mat_checkerror(bool &check);
 
 void advanceStep();
 void setProgram(int programIndex);

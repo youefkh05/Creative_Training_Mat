@@ -12,9 +12,9 @@
 #define OLED_SDA_PIN                21
 #define OLED_SCL_PIN                22
 
-#define OLED_BUTTON_UP_PIN          23
-#define OLED_BUTTON_SELECT_PIN      18
-#define OLED_BUTTON_DOWN_PIN        19
+#define OLED_BUTTON_UP_PIN          34
+#define OLED_BUTTON_SELECT_PIN      35
+#define OLED_BUTTON_DOWN_PIN        36
 
 void OLED_init(void);
 

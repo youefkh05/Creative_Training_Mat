@@ -1,11 +1,11 @@
 #include "mat.h"
 
-
 // Pin Definitions
-const int BUTTONS[] = {0, 1, 2, 3, A0};  // B1-B5 (HIGH when pressed)
-// 0 → Head, 1 → Right Hand, 2 → Left Hnad, 3 → Right Leg, 4 → Left Leg
+const int BUTTONS[] = {2, 3, 4, 5, 12, 13};  // B1-B6 (LOW when pressed)
+// 0 → LEFT_HAND, 1 → RIGHT_HAND, 2 → LEFT_KNEE, 3 → RIGHT_KNEE, 4 → LEFT_LEG 5 →RIGHT_LEG
+  
 
-const int ALL_LEDS[] = {4,5,6,7,8, 9,10,11,12,13}; // [0-4]=Green, [5-9]=Red
+const int ALL_LEDS[] = {14, 15, 16, 17,18, 19, 23, 25, 26, 27, 32, 33}; // [0-5]=Green, [6-12]=Red
 
 #define RED(i) ((i) + RED_OFFSET)
 // Exercise sequences for each program
@@ -107,6 +107,7 @@ void resetLedSolid(int step, bool oppos) {
 }
 
 void resetAllLEDs() {
+  ledState = false;
   for (int i = 0; i < MAX_LEDS*2; i++) {
     digitalWrite(ALL_LEDS[i], LOW);
   }
@@ -303,6 +304,10 @@ void advanceStep() {
 }
 
 void setProgram(int programIndex) {
+    currentState = IDLE;     // Start in idle
+    preStep = -1;
+    nextStep = -1;
+
   // Validate program index
   currentProgram = constrain(programIndex, 0, TRAININGS-1);
   programStep = 0;
