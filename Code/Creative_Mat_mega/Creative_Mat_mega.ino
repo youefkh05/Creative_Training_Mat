@@ -1,7 +1,10 @@
 #include "mat.h"
 
 void setup() {
+  Serial.begin(9600);
   mat_init();
+  Serial.println("Start");
+  delay(500);
 }
 
 // ========================
@@ -15,7 +18,6 @@ void loop() {
     case BLINK_TARGET: handleBlinkTarget(currentTime); break;
     case WAIT_FOR_HOLD: handleWaitForHold(currentTime); break;
     case VERIFY_NEXT: handleVerifyNext(); break;
-    case ERROR:       handleError(currentTime); break;
   }
   
   mat_checkerror();

@@ -10,10 +10,12 @@ const int ALL_LEDS[] = {9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}; // [0-5]
 #define RED(i) ((i) + RED_OFFSET)
 // Exercise sequences for each program
 const int PROGRAMS[TRAININGS][MAX_STEPS] = {
-  {RED(RIGHT_HAND), RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), RED(LEFT_HAND), RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, 4, RED(1), RED(4)},  // Program 0: Cat Cow
-  {1, 2, 3, 4, RED(1), 1, RED(4), 4, RED(1), RED(4)},  // Program 0: Cat Cow
-  {1, 2+RED_OFFSET, 1, 3, -1},  // Program 1: Step 2 uses red
-  {4+RED_OFFSET, 3, 2, -1, -1}  // Program 2: Step 0 uses red
+  {RED(RIGHT_HAND), RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), RED(LEFT_HAND), RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, RIGHT_HAND, -1},  // Program 0: Cat Cow
+  { RED(RIGHT_HAND), RIGHT_HAND, RED(RIGHT_HAND), RIGHT_HAND, RED(RIGHT_HAND), RIGHT_HAND, -1 },
+  { RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, -1 },
+  { RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), LEFT_KNEE, RIGHT_HAND, LEFT_LEG, RIGHT_KNEE, RED(RIGHT_KNEE), -1 },
+  { RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE), RED(RIGHT_KNEE), RED(LEFT_LEG), LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_LEG, -1 },
+  { RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, RED(LEFT_HAND), RIGHT_KNEE, RED(RIGHT_KNEE), -1 },
 };
 
 // Global Variables
@@ -28,6 +30,8 @@ unsigned long lastBlinkTime = 0;
 bool ledState = false;
 unsigned long errorStartTime = 0;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
+unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
+bool ledStates[MAX_LEDS * 2] = {false};         // Track on/off state of each LED
 
 
 #ifdef DEBUG
@@ -60,6 +64,12 @@ void mat_init(){
     digitalWrite(ALL_LEDS[i], LOW);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], LOW);
   }
+
+  #ifdef DEBUG
+    Serial.println("Init");
+    delay(500);
+  #endif
+  
 }
 
 // ========================
@@ -67,48 +77,102 @@ void mat_init(){
 // ========================
 
 void blinkLed(int step, unsigned long currentTime, bool oppos) {
-    if (currentTime - lastBlinkTime >= BLINK_INTERVAL) {
-      ledState = !ledState;
-      int physicalPin = ALL_LEDS[step];
-      digitalWrite(physicalPin, ledState);
+  int index = step;
+  int physicalPin = ALL_LEDS[index];
+
+  if (currentTime - blinkTimers[index] >= BLINK_INTERVAL) {
+    ledStates[index] = !ledStates[index];
+    digitalWrite(physicalPin, ledStates[index]);
+    
+    #ifdef DEBUG
+    Serial.print("Blink led:");
+    Serial.println(index);
+    delay(500);
+    #endif
+    
+
+    // Turn off opposite color when needed
+    if (oppos == HIGH) {
+      int oppIndex = (step >= RED_OFFSET) ? step - RED_OFFSET : step + RED_OFFSET;
+      digitalWrite(ALL_LEDS[oppIndex], LOW);
+      ledStates[oppIndex] = false;
       
-      // Turn off opposite color (When needed)
-      if(oppos == HIGH){
-      int oppositeColorPin = ALL_LEDS[(step >= RED_OFFSET) ? step - RED_OFFSET : step + RED_OFFSET];
-      digitalWrite(oppositeColorPin, LOW);
-      }
-      
-      lastBlinkTime = currentTime;
+      #ifdef DEBUG
+      Serial.print("blink off led:");
+      Serial.println(oppIndex);
+      delay(500);
+      #endif
     }
+
+    blinkTimers[index] = currentTime;
+  }
 }
 
 void setLedSolid(int step, bool oppos) {
     int physicalPin = ALL_LEDS[step];
+    ledStates[step] = HIGH;
     digitalWrite(physicalPin, HIGH);
+
+    #ifdef DEBUG
+    Serial.print("set on led:");
+    Serial.println(step);
+    delay(500);
+    #endif
+    
 
     // Turn off opposite color (When needed)
     if(oppos == HIGH){
-    int oppositeColorPin = ALL_LEDS[(step >= RED_OFFSET) ? step - RED_OFFSET : step + RED_OFFSET];
+    int oppIndex = (step >= RED_OFFSET) ? step - RED_OFFSET : step + RED_OFFSET;
+    int oppositeColorPin = ALL_LEDS[oppIndex];
+
+    #ifdef DEBUG
+    Serial.print("set off led:");
+    Serial.println(oppIndex);
+    delay(500);
+    #endif
+
     digitalWrite(oppositeColorPin, LOW);
+    ledStates[oppIndex] = LOW;
     }
 
 }
 
 void resetLedSolid(int step, bool oppos) {
     int physicalPin = ALL_LEDS[step];
+    ledStates[step] = LOW;
     digitalWrite(physicalPin, LOW);
+
+    #ifdef DEBUG
+    Serial.print("reset off led:");
+    Serial.println(step);
+    delay(500);
+    #endif
 
     // Turn on opposite color (When needed)
     if(oppos == HIGH){
-    int oppositeColorPin = ALL_LEDS[(step >= RED_OFFSET) ? step - RED_OFFSET : step + RED_OFFSET];
-    digitalWrite(oppositeColorPin, HIGH);
+      int oppIndex = (step >= RED_OFFSET) ? step - RED_OFFSET : step + RED_OFFSET;
+      int oppositeColorPin = ALL_LEDS[oppIndex];
+      digitalWrite(oppositeColorPin, HIGH);
+      ledStates[oppIndex] = HIGH;
+      #ifdef DEBUG
+      Serial.print("reset on led:");
+      Serial.println(oppIndex);
+      delay(500);
+      #endif
     }
 
 }
 
 void resetAllLEDs() {
   ledState = false;
+
+  #ifdef DEBUG
+      Serial.println("reset all leds:");
+      delay(500);
+  #endif
+
   for (int i = 0; i < MAX_LEDS*2; i++) {
+    ledStates[i] = LOW;
     digitalWrite(ALL_LEDS[i], LOW);
   }
 }
@@ -117,7 +181,12 @@ void resetAllLEDs() {
 bool isButtonPressed(int buttonIndex) {
   static unsigned long lastDebounceTime[MAX_LEDS] = {0};
   static bool lastButtonState[MAX_LEDS] = {HIGH};
-  
+
+  #ifdef DEBUG
+      Serial.println("button pressed");
+      delay(500);
+  #endif
+
   bool reading = digitalRead(BUTTONS[buttonIndex]);
   if (reading != lastButtonState[buttonIndex]) {
     lastDebounceTime[buttonIndex] = millis();
@@ -144,43 +213,90 @@ void triggerError(States &errorSourceState) {
   
   // State-specific recovery
   errorSourceState = (errorSourceState == VERIFY_NEXT) ? WAIT_FOR_HOLD : BLINK_TARGET;
+
+  #ifdef DEBUG
+      Serial.print("Trigger Error state:");
+      Serial.println(errorSourceState);
+      delay(500);
+  #endif
 }
 
 void handleIdle() {
+
+  #ifdef DEBUG
+      Serial.println("Handle idle");
+      delay(500);
+  #endif
+
   if (digitalRead(BUTTONS[0]) == LOW) { // Start program on button 0 press
     setProgram(currentProgram);
   }
 }
 
 void handleBlinkTarget(unsigned long currentTime) {
+
+  #ifdef DEBUG
+      Serial.println("Blink Target");
+      delay(500);
+  #endif
+
   blinkLed(currentStep, currentTime, LOW); // Always turn off opposite LED
   
   // RED LED (release): wait for button to be LOW
   if (currentStep >= RED_OFFSET) {
     if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == HIGH) {
+      #ifdef DEBUG
+        Serial.println("Blink Target red");
+        delay(500);
+      #endif
       setLedSolid(currentStep, LOW); 
       currentState = WAIT_FOR_HOLD;
     }
   } 
   // GREEN LED (press): wait for button to be HIGH
   else if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == LOW) {
+    #ifdef DEBUG
+        Serial.println("Blink Target green");
+        delay(500);
+    #endif
     setLedSolid(currentStep, LOW); 
     currentState = WAIT_FOR_HOLD;
   }
 }
 
 void handleWaitForHold(unsigned long currentTime) {
+  #ifdef DEBUG
+        Serial.println("handle Wait");
+        delay(500);
+  #endif
+
   if (programStep + 1 < totalSteps) {
     nextStep = PROGRAMS[currentProgram][programStep + 1];
-    if(programStep>0)
+    if(programStep>0){
         preStep = PROGRAMS[currentProgram][programStep - 1];
+    }
+
   } else {
     nextStep = -1;
   }
 
+  #ifdef DEBUG
+        Serial.print("handle Wait next");
+        Serial.println(nextStep);
+        delay(500);
+  #endif  
+
   if (nextStep != -1) {
     // Handle special same-button transition (green↔red)
     if (abs(nextStep - currentStep) == RED_OFFSET) {
+
+      #ifdef DEBUG
+        Serial.print("Special same button current:");
+        Serial.print(currentStep);
+        Serial.print("Special same button next:");
+        Serial.println(nextStep);
+        delay(500);
+      #endif  
       
       blinkLed(nextStep, currentTime, HIGH);
       
@@ -193,11 +309,27 @@ void handleWaitForHold(unsigned long currentTime) {
         programStep++;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
+
+         #ifdef DEBUG
+          Serial.print("Finished Special same button current:");
+          Serial.print(currentStep);
+          Serial.print("Special same button next:");
+          Serial.println(nextStep);
+          delay(500);
+         #endif  
       }
       return;
     }
 
     // Normal case (different buttons)
+    #ifdef DEBUG
+          Serial.print("Normal button current:");
+          Serial.print(currentStep);
+          Serial.print("Normal button next:");
+          Serial.println(nextStep);
+          delay(500);
+    #endif  
+    
     setLedSolid(currentStep, HIGH);
     blinkLed(nextStep, currentTime, HIGH);
 
@@ -220,6 +352,13 @@ void handleWaitForHold(unsigned long currentTime) {
       programStep++;
       currentStep = nextStep;
       currentState = VERIFY_NEXT;
+      #ifdef DEBUG
+          Serial.print("Finished Normal button current:");
+          Serial.print(currentStep);
+          Serial.print("Special Normal next:");
+          Serial.println(nextStep);
+          delay(500);
+      #endif  
     }
   } else {
     advanceStep();
@@ -228,6 +367,9 @@ void handleWaitForHold(unsigned long currentTime) {
 
 void handleVerifyNext() {
   delay(HOLD_DURATION);
+  #ifdef DEBUG
+    Serial.println("Verify next");
+  #endif  
 
   // Verify next button is still in correct state
   bool nextButtonOk = (nextStep >= RED_OFFSET)
@@ -241,12 +383,6 @@ void handleVerifyNext() {
   }
 }
 
-void handleError(unsigned long currentTime) {
-  
-  if (millis() - errorStartTime > ERROR_DURATION) {
-    currentState = IDLE;
-  }
-}
 
 void mat_checkerror() {
   for (int i = 0; i < programStep; ++i) {
@@ -273,9 +409,9 @@ void mat_checkerror() {
     // If actual state does not match expected
     if (actualState != expectedState) {
       int nextindex = currentStep % MAX_LEDS;
-
+      int futureindex = nextStep % MAX_LEDS;
       // 🚫 FIX 1: Only trigger error if current step is unrelated to this button
-      if (nextindex != buttonIndex) {
+      if ((nextindex != buttonIndex) && (futureindex != buttonIndex)) {
 
         // ✅ FIX 2: Before resetting, check if the user has already corrected the issue
         if (digitalRead(BUTTONS[buttonIndex]) != expectedState) {
@@ -284,6 +420,20 @@ void mat_checkerror() {
           currentStep = step;
           currentState = BLINK_TARGET;
           resetAllLEDs();
+          #ifdef DEBUG
+
+            Serial.print("mat check error nextindex:");
+            Serial.println(nextindex);
+            Serial.print("futureindex:");
+            Serial.println(futureindex);
+            Serial.print("buttonIndex:");
+            Serial.println(buttonIndex);
+            Serial.print("program step:");
+            Serial.print(programStep);
+            Serial.print("currentStep:");
+            Serial.print(step);
+            delay(500);
+          #endif  
           return;
         }
 
@@ -302,21 +452,39 @@ void advanceStep() {
 
   programStep++;
 
+  #ifdef DEBUG
+    Serial.print("Advance Step prog step:");
+    Serial.println(programStep);
+  #endif
+
   if (programStep >= totalSteps || PROGRAMS[currentProgram][programStep] == -1) {
     celebrateCompletion();
     currentProgram = (currentProgram + 1) % TRAININGS;
     currentState = IDLE;
+
+    #ifdef DEBUG
+      Serial.print("Finished program start program:");
+      Serial.println(currentProgram);
+    #endif
+
     return;
   }
 
   currentStep = PROGRAMS[currentProgram][programStep];
+
   currentState = BLINK_TARGET;
+
+  #ifdef DEBUG
+      Serial.print("currentStep");
+      Serial.println(currentStep);
+  #endif
+
 }
 
 void setProgram(int programIndex) {
-    currentState = IDLE;     // Start in idle
-    preStep = -1;
-    nextStep = -1;
+  currentState = IDLE;     // Start in idle
+  preStep = -1;
+  nextStep = -1;
 
   // Validate program index
   currentProgram = constrain(programIndex, 0, TRAININGS-1);
@@ -330,6 +498,13 @@ void setProgram(int programIndex) {
   
   resetAllLEDs();
   currentState = BLINK_TARGET;
+
+  #ifdef DEBUG
+    Serial.print("Set program currentProgram");
+    Serial.println(currentProgram);
+    Serial.print("Total steps");
+    Serial.println(totalSteps);
+  #endif
 }
 
 void celebrateCompletion() {
@@ -339,6 +514,7 @@ void celebrateCompletion() {
   for (int i = 0; i < flashCount; i++) {
     // Green flash
     for (int led = 0; led < MAX_LEDS; led++) {
+      ledStates[led] = HIGH;
       digitalWrite(ALL_LEDS[led], HIGH);
     }
     delay(flashDuration);
@@ -346,6 +522,7 @@ void celebrateCompletion() {
     
     // Red flash
     for (int led = 0; led < MAX_LEDS; led++) {
+       ledStates[led + RED_OFFSET] = HIGH;
       digitalWrite(ALL_LEDS[led + RED_OFFSET], HIGH);
     }
     delay(flashDuration);
