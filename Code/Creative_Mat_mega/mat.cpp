@@ -26,9 +26,6 @@ int totalSteps = MAX_STEPS;     // Will be adjusted per program
 int preStep = -1;
 int currentStep = PROGRAMS[currentProgram][0];
 int nextStep = -1;
-unsigned long lastBlinkTime = 0;
-bool ledState = false;
-unsigned long errorStartTime = 0;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
 unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
 bool ledStates[MAX_LEDS * 2] = {false};         // Track on/off state of each LED
@@ -164,7 +161,6 @@ void resetLedSolid(int step, bool oppos) {
 }
 
 void resetAllLEDs() {
-  ledState = false;
 
   #ifdef DEBUG
       Serial.println("reset all leds:");
@@ -209,7 +205,7 @@ bool isButtonPressed(int buttonIndex) {
 
 // Enhanced error handling
 void triggerError(States &errorSourceState) {
-  errorStartTime = millis();
+  //errorStartTime = millis();
   
   // State-specific recovery
   errorSourceState = (errorSourceState == VERIFY_NEXT) ? WAIT_FOR_HOLD : BLINK_TARGET;
@@ -309,7 +305,7 @@ void handleWaitForHold(unsigned long currentTime) {
         programStep++;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-
+        //nextStep++;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
           Serial.print(currentStep);
@@ -354,8 +350,8 @@ void handleWaitForHold(unsigned long currentTime) {
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
           Serial.print("Finished Normal button current:");
-          Serial.print(currentStep);
-          Serial.print("Special Normal next:");
+          Serial.println(currentStep);
+          Serial.print("Normal next:");
           Serial.println(nextStep);
           delay(500);
       #endif  
@@ -391,17 +387,20 @@ void mat_checkerror() {
     int buttonIndex = step % MAX_LEDS;
     bool expectedState = (step >= RED_OFFSET) ? HIGH : LOW; // Red = released, Green = pressed
     bool actualState = digitalRead(BUTTONS[buttonIndex]);
+    #ifdef DEBUG
+      Serial.println("mat check error off:");
+    #endif 
 
     resetLedSolid(step, LOW);
 
     // Loop through upcoming steps to check if the same button is pressed/released
     for (int j = i + 1; j < programStep; ++j) {
-      int nextStep = PROGRAMS[currentProgram][j];
-      int nextButtonIndex = nextStep % MAX_LEDS;
+      int nextStepe = PROGRAMS[currentProgram][j];
+      int nextButtonIndex = nextStepe % MAX_LEDS;
 
       // If the same button is involved in a later step, update expected state and position
       if (nextButtonIndex == buttonIndex) {
-        expectedState = (nextStep >= RED_OFFSET) ? HIGH : LOW;
+        expectedState = (nextStepe >= RED_OFFSET) ? HIGH : LOW;
         position = j;
       }
     }
@@ -421,7 +420,6 @@ void mat_checkerror() {
           currentState = BLINK_TARGET;
           resetAllLEDs();
           #ifdef DEBUG
-
             Serial.print("mat check error nextindex:");
             Serial.println(nextindex);
             Serial.print("futureindex:");
@@ -460,7 +458,12 @@ void advanceStep() {
   if (programStep >= totalSteps || PROGRAMS[currentProgram][programStep] == -1) {
     celebrateCompletion();
     currentProgram = (currentProgram + 1) % TRAININGS;
-    currentState = IDLE;
+    currentState = IDLE;     // Start in idle
+    programStep = 0;
+    totalSteps = MAX_STEPS;     // Will be adjusted per program
+    preStep = -1;
+    currentStep = PROGRAMS[currentProgram][0];
+    nextStep = -1;
 
     #ifdef DEBUG
       Serial.print("Finished program start program:");
