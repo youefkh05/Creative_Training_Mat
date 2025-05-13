@@ -1,10 +1,14 @@
 #include "mat.h"
 
 void setup() {
-  Serial.begin(9600);
+  
   mat_init();
-  Serial.println("Start");
-  delay(500);
+
+  #ifdef DEBUG
+    Serial.println("Start");
+    delay(500);
+  #endif
+  
 }
 
 // ========================

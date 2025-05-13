@@ -10,11 +10,11 @@ const int ALL_LEDS[] = {9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}; // [0-5]
 #define RED(i) ((i) + RED_OFFSET)
 // Exercise sequences for each program
 const int PROGRAMS[TRAININGS][MAX_STEPS] = {
+  { RED(RIGHT_HAND), RIGHT_HAND, RED(LEFT_KNEE), RIGHT_KNEE, RED(RIGHT_KNEE), RIGHT_HAND, LEFT_KNEE, RIGHT_HAND, RED(RIGHT_HAND), RIGHT_HAND, -1 },
+  { RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE), RED(RIGHT_KNEE), RED(LEFT_LEG), LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_LEG, -1 },
   {RED(RIGHT_HAND), RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), RED(LEFT_HAND), RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, RIGHT_HAND, -1},  // Program 0: Cat Cow
-  { RED(RIGHT_HAND), RIGHT_HAND, RED(RIGHT_HAND), RIGHT_HAND, RED(RIGHT_HAND), RIGHT_HAND, -1 },
   { RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, -1 },
   { RED(LEFT_KNEE), RED(LEFT_LEG), RED(RIGHT_HAND), LEFT_KNEE, RIGHT_HAND, LEFT_LEG, RIGHT_KNEE, RED(RIGHT_KNEE), -1 },
-  { RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE), RED(RIGHT_KNEE), RED(LEFT_LEG), LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_LEG, -1 },
   { RED(RIGHT_KNEE), RIGHT_KNEE, LEFT_HAND, RED(LEFT_HAND), RIGHT_KNEE, RED(RIGHT_KNEE), -1 },
 };
 
@@ -26,6 +26,7 @@ int totalSteps = MAX_STEPS;     // Will be adjusted per program
 int preStep = -1;
 int currentStep = PROGRAMS[currentProgram][0];
 int nextStep = -1;
+int specialidx = -1;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
 unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
 bool ledStates[MAX_LEDS * 2] = {false};         // Track on/off state of each LED
@@ -45,6 +46,8 @@ void printState() {
   Serial.print(currentProgram);
   Serial.print(" | Step: ");
   Serial.print(programStep);
+  Serial.print(" | Pre: ");
+  Serial.print(preStep);
   Serial.print(" | Current: ");
   Serial.print(currentStep);
   Serial.print(" | Next: ");
@@ -63,6 +66,7 @@ void mat_init(){
   }
 
   #ifdef DEBUG
+    Serial.begin(9600);
     Serial.println("Init");
     delay(500);
   #endif
@@ -285,7 +289,9 @@ void handleWaitForHold(unsigned long currentTime) {
   if (nextStep != -1) {
     // Handle special same-button transition (green↔red)
     if (abs(nextStep - currentStep) == RED_OFFSET) {
-
+     
+      specialidx = programStep; 
+      
       #ifdef DEBUG
         Serial.print("Special same button current:");
         Serial.print(currentStep);
@@ -303,9 +309,10 @@ void handleWaitForHold(unsigned long currentTime) {
 
       if (nextButtonReady) {
         programStep++;
+        preStep = currentStep;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-        //nextStep++;
+
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
           Serial.print(currentStep);
@@ -346,6 +353,7 @@ void handleWaitForHold(unsigned long currentTime) {
 
     if (nextButtonInitiated) {
       programStep++;
+      preStep = currentStep;
       currentStep = nextStep;
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
@@ -381,62 +389,71 @@ void handleVerifyNext() {
 
 
 void mat_checkerror() {
-  for (int i = 0; i < programStep; ++i) {
-    int step = PROGRAMS[currentProgram][i];
-    int position = i;
-    int buttonIndex = step % MAX_LEDS;
-    bool expectedState = (step >= RED_OFFSET) ? HIGH : LOW; // Red = released, Green = pressed
-    bool actualState = digitalRead(BUTTONS[buttonIndex]);
-    #ifdef DEBUG
-      Serial.println("mat check error off:");
-    #endif 
-
-    resetLedSolid(step, LOW);
-
-    // Loop through upcoming steps to check if the same button is pressed/released
-    for (int j = i + 1; j < programStep; ++j) {
-      int nextStepe = PROGRAMS[currentProgram][j];
-      int nextButtonIndex = nextStepe % MAX_LEDS;
-
-      // If the same button is involved in a later step, update expected state and position
-      if (nextButtonIndex == buttonIndex) {
-        expectedState = (nextStepe >= RED_OFFSET) ? HIGH : LOW;
-        position = j;
-      }
-    }
-
-    // If actual state does not match expected
-    if (actualState != expectedState) {
-      int nextindex = currentStep % MAX_LEDS;
-      int futureindex = nextStep % MAX_LEDS;
-      // 🚫 FIX 1: Only trigger error if current step is unrelated to this button
-      if ((nextindex != buttonIndex) && (futureindex != buttonIndex)) {
-
-        // ✅ FIX 2: Before resetting, check if the user has already corrected the issue
-        if (digitalRead(BUTTONS[buttonIndex]) != expectedState) {
-          // Still an error, trigger error handling
-          programStep = position;
-          currentStep = step;
-          currentState = BLINK_TARGET;
-          resetAllLEDs();
-          #ifdef DEBUG
-            Serial.print("mat check error nextindex:");
-            Serial.println(nextindex);
-            Serial.print("futureindex:");
-            Serial.println(futureindex);
-            Serial.print("buttonIndex:");
-            Serial.println(buttonIndex);
-            Serial.print("program step:");
-            Serial.print(programStep);
-            Serial.print("currentStep:");
-            Serial.print(step);
-            delay(500);
-          #endif  
-          return;
-        }
-
-        // 🟢 If user already fixed it, skip to next
+  if(programStep<(totalSteps-1) && programStep>2){
+    for (int i = (programStep-3); i < programStep; ++i){
+      //ignore special case
+      if( (i==specialidx) || (i==(specialidx+1)) ){
         continue;
+      }
+
+      int step = PROGRAMS[currentProgram][i];
+      int position = i;
+      int buttonIndex = step % MAX_LEDS;
+      bool expectedState = (step >= RED_OFFSET) ? HIGH : LOW; // Red = released, Green = pressed
+      bool actualState = digitalRead(BUTTONS[buttonIndex]);
+      #ifdef DEBUG
+        Serial.println("mat check error off:");
+      #endif 
+      
+      // don't reset if it's the current led
+      if(((currentStep % MAX_LEDS) != buttonIndex) &&  ((nextStep % MAX_LEDS) != buttonIndex) && ((preStep % MAX_LEDS) != buttonIndex) ){
+        resetLedSolid(step, LOW);
+      }
+      // Loop through upcoming steps to check if the same button is pressed/released
+      for (int j = i + 1; j < programStep; ++j) {
+        int nextStepe = PROGRAMS[currentProgram][j];
+        int nextButtonIndex = nextStepe % MAX_LEDS;
+
+        // If the same button is involved in a later step, update expected state and position
+        if (nextButtonIndex == buttonIndex) {
+          expectedState = (nextStepe >= RED_OFFSET) ? HIGH : LOW;
+          position = j;
+        }
+      }
+
+      // If actual state does not match expected
+      if (actualState != expectedState) {
+        int nextindex = currentStep % MAX_LEDS;
+        int futureindex = nextStep % MAX_LEDS;
+        // 🚫 FIX 1: Only trigger error if current step is unrelated to this button
+        if ((nextindex != buttonIndex) && (futureindex != buttonIndex)) {
+
+          // ✅ FIX 2: Before resetting, check if the user has already corrected the issue
+          if (digitalRead(BUTTONS[buttonIndex]) != expectedState) {
+            // Still an error, trigger error handling
+            programStep = position;
+            currentStep = PROGRAMS[currentProgram][programStep];
+            currentState = BLINK_TARGET;
+            resetAllLEDs();
+            #ifdef DEBUG
+              Serial.print("mat check error nextindex:");
+              Serial.println(nextindex);
+              Serial.print("futureindex:");
+              Serial.println(futureindex);
+              Serial.print("buttonIndex:");
+              Serial.println(buttonIndex);
+              Serial.print("program step:");
+              Serial.println(programStep);
+              Serial.print("currentStep:");
+              Serial.println(step);
+              delay(500);
+            #endif  
+            return;
+          }
+
+          // 🟢 If user already fixed it, skip to next
+          continue;
+        }
       }
     }
   }
@@ -464,6 +481,7 @@ void advanceStep() {
     preStep = -1;
     currentStep = PROGRAMS[currentProgram][0];
     nextStep = -1;
+    specialidx = -1;
 
     #ifdef DEBUG
       Serial.print("Finished program start program:");
@@ -473,6 +491,7 @@ void advanceStep() {
     return;
   }
 
+  preStep = currentStep;
   currentStep = PROGRAMS[currentProgram][programStep];
 
   currentState = BLINK_TARGET;
@@ -488,6 +507,7 @@ void setProgram(int programIndex) {
   currentState = IDLE;     // Start in idle
   preStep = -1;
   nextStep = -1;
+  specialidx = -1;
 
   // Validate program index
   currentProgram = constrain(programIndex, 0, TRAININGS-1);

@@ -34,7 +34,7 @@ enum BodyPart {
 #define MAX_STEPS  15  // Maximum steps per program
 #define MAX_LEDS   6  // Number of physical LEDs per color
 #define RED_OFFSET MAX_LEDS  // Red LEDs start at index MAX_LEDS
-#define DEBUG 
+//#define DEBUG 
 
 // Add debounce constants
 #define DEBOUNCE_DELAY  50
