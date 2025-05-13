@@ -86,4 +86,5 @@ void setProgram(int programIndex);
 void triggerError(States &errorSourceState);
 void celebrateCompletion();
 
+void mat_loop();
 #endif // MAT_H

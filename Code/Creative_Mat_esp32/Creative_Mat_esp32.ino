@@ -157,10 +157,12 @@ void loop()
     {
       if (current_screen == 0)
       {
+        startmat = true;
         current_screen = 1;
       }
       else if (current_screen == 1)
       {
+        startmat = false;
         current_screen = 0;
       }
     }
@@ -235,6 +237,7 @@ void loop()
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
         u8g2.setColorIndex(1); u8g2.drawBox(2, 16, 62, 6);
         startmat = true;
+        mat_loop();
       }
 
     }
@@ -243,23 +246,7 @@ void loop()
 
   u8g2.setAutoPageClear(0);
   /* End of OLED Control ***********************************************************************/
-  while(startmat){
-          unsigned long currentTime = millis();
-        
-          switch(currentState) {
-            case IDLE:        handleIdle(); break;
-            case BLINK_TARGET: handleBlinkTarget(currentTime); break;
-            case WAIT_FOR_HOLD: handleWaitForHold(currentTime); break;
-            case VERIFY_NEXT: handleVerifyNext(); break;
-          }
-          
-          mat_checkerror();
 
-          #ifdef DEBUG
-            printState();
-            delay(100); // Prevent serial flooding
-          #endif
-  } // endof while
 
   /* End of Variables Control ***************************************************************************************/
 

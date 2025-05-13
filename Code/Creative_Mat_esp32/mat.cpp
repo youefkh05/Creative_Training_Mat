@@ -232,7 +232,7 @@ void handleIdle() {
       delay(500);
   #endif
 
-  if (digitalRead(BUTTONS[0]) == LOW) { // Start program on button 0 press
+  if (startmat) { // Start program on button 0 press
     setProgram(currentProgram);
   }
 }
@@ -556,7 +556,24 @@ void celebrateCompletion() {
     resetAllLEDs();
   }
 }
+void mat_loop(){
 
+  unsigned long currentTime = millis();
+        
+   switch(currentState) {
+      case IDLE:        handleIdle(); break;
+      case BLINK_TARGET: handleBlinkTarget(currentTime); break;
+      case WAIT_FOR_HOLD: handleWaitForHold(currentTime); break;
+      case VERIFY_NEXT: handleVerifyNext(); break;
+    }
+          
+    mat_checkerror();
 
+    #ifdef DEBUG
+      printState();
+      delay(100); // Prevent serial flooding
+    #endif
+
+}
 
 
