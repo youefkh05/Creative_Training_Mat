@@ -51,7 +51,8 @@ char items[n_items][25] = {
     {"1extra"},
     {"2extra"},
     {"3extra"},
-    {"4extra"},};
+    {"connect device"},
+  };
 
 int previous =0;
 int selected = 1;
@@ -180,15 +181,17 @@ void loop()
       // Menu Items with icons
       //Previous
       u8g2.drawStr(26, 15 + 0 * 22, items[previous]);
-      u8g2.drawXBMP(4, 2 + 0 * 22, 16, 16, menu_icons[previous]);
+
+
+      u8g2.drawXBMP(4, 2 + 0 * 22, icon_width_big, icon_height_big , menu_icons[previous]);
 
       //Current
       u8g2.drawStr(26, 15 + 1 * 22, items[selected]);
-      u8g2.drawXBMP(4, 2 + 1 * 22, 16, 16, menu_icons[selected]);
+      u8g2.drawXBMP(4, 2 + 1 * 22, icon_width_big  , icon_height_big, menu_icons[selected]);
 
       //Next
       u8g2.drawStr(26, 15 + 2 * 22, items[next]);
-      u8g2.drawXBMP(4, 2 + 2 * 22, 16, 16, menu_icons[next]);
+      u8g2.drawXBMP(4, 2 + 2 * 22, icon_width_big  , icon_height_big, menu_icons[next]);
      
     
       // Selection outline
@@ -205,29 +208,26 @@ void loop()
       u8g2.setFont(u8g2_font_helvB08_tr); // consistent font
       u8g2.setColorIndex(1);              // white text
 
-      if (selected == 0)
+      if (selected == (n_items-1))
       {
         dtostrf(x, 6, 2, buffer);
-        u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
+        u8g2.drawXBMP(0, 0, image_width_big, image_height_big, training_screen);
         u8g2.drawStr(25, 55, buffer);
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
         u8g2.setColorIndex(1); u8g2.drawBox(2, 16, progress, 6);
       }
-      else if (selected == 1)
+      else 
       {
-        dtostrf(x, 6, 2, buffer2);
-        u8g2.drawXBMP(0, 0, 128, 64, waterlevel_measurement);
-        u8g2.drawStr(25, 55, buffer2);
+        //dtostrf(x, 6, 2, buffer2);
+        u8g2.drawXBMP(0, 0, image_width_big, image_height_big, training_screen);
+        u8g2.setFont(u8g_font_7x14);
+        u8g2.drawStr(1, 10, "1");
+        u8g2.drawStr(1+8*2, 10, "2");
+        u8g2.drawStr(1, 40, "second raw");
+        u8g2.drawStr(10, 55, "third raw");
+        //u8g2.drawStr(25, 55, buffer2);
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
-        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, progress2, 6);
-      }
-      else if (selected == 2)
-      {
-        dtostrf(x, 6, 2, temp_buffer);
-        u8g2.drawXBMP(0, 0, 128, 64, temp_measurement);
-        u8g2.drawStr(25, 55, temp_buffer);
-        u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
-        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, temp_progress, 6);
+        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, 62, 6);
       }
     }
     //delay(100);
