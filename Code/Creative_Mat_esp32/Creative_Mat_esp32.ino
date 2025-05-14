@@ -320,7 +320,6 @@ void loop()
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
         u8g2.setColorIndex(1); u8g2.drawBox(2, 16, 62, 6);
         startmat = true;
-        mat_loop();
       }
 
     }
@@ -330,7 +329,7 @@ void loop()
   u8g2.setAutoPageClear(0);
   /* End of OLED Control ***********************************************************************/
 
-
+  mat_loop();
   /* End of Variables Control ***************************************************************************************/
 
   /* Send Data to web server **********************************************************************/
