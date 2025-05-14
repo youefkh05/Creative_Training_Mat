@@ -63,10 +63,13 @@ extern int totalSteps;
 extern int preStep;
 extern int currentStep;
 extern int nextStep;
+extern int oled_step;
+extern int specialidx;
 extern unsigned long lastBlinkTime;
 extern bool ledState;
 extern unsigned long errorStartTime;
 extern bool buttonStates[MAX_LEDS];
+extern bool hold_flag;
 
 // ==== Functions ====
 #ifdef DEBUG
@@ -88,7 +91,7 @@ void handleError(unsigned long currentTime);
 void mat_checkerror();
 
 void advanceStep();
-void setProgram(int programIndex);
+void setProgram(int programIndex, bool start);
 void triggerError(States &errorSourceState);
 void celebrateCompletion();
 

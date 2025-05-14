@@ -11,9 +11,9 @@ const char training_problem[PROBLEMS][26]={
   {"Core exercises"},
   {"Knee pain"},
   {"Kyphosis"},
-  {"Lumbar flattening"},
-  {"Mechanical low back pain"},
-  {"piriforms stretch"},
+  {"Lumbar flat"},
+  {"low back pain"},
+  {"pirifrms strch"},
   {"plank"},
   {"push ups"},
   {"Extra"},
@@ -23,7 +23,7 @@ const char problem_program[TrainingPerProblem*PROBLEMS][26]={
   //problem 0
   {"Bear plank"},
   {"Bird-Dog"},
-  {"Mountain climbers"},
+  {"Mountin climbr"},
   {"Shoulder taps"},
 
   //problem 1
@@ -35,8 +35,8 @@ const char problem_program[TrainingPerProblem*PROBLEMS][26]={
   //problem 2
   {"Bird-Dog"},
   {"Cat cow"},
-  {"Scapular cat push ups"},
-  {"Thread the needle"},
+  {"Scapular cat"},
+  {"Thread needle"},
 
   //problem 3
   {"Bird-Dog"},
@@ -51,14 +51,14 @@ const char problem_program[TrainingPerProblem*PROBLEMS][26]={
   {"Extra1"},
 
   //problem 5
-  {"Piriformis Stretch"},
+  {"pirifrms strch"},
   {"Extra1"},
   {"Extra2"},
   {"Extra3"},
 
   //problem 6
-  {"Plank Exercise L"},
-  {"Plank Exercise R"},
+  {"Plank L"},
+  {"Plank R"},
   {"Extra2"},
   {"Extra3"},
 
@@ -87,71 +87,112 @@ const char body_part[MAX_LEDS][11]={
 #define RED(i) ((i) + RED_OFFSET)
 // Exercise sequences for each program
 const int PROGRAMS[TrainingPerProblem*PROBLEMS][MAX_STEPS] = {
-  { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_LEG, RIGHT_LEG, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_KNEE, RIGHT_KNEE, -1 },
+  //problem 0
+  { -1, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_LEG, RIGHT_LEG, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_KNEE, RIGHT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, RED(RIGHT_HAND), RED(LEFT_KNEE), RIGHT_HAND, LEFT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_LEG, RIGHT_LEG, RED(RIGHT_LEG),RIGHT_LEG, RED(LEFT_LEG),LEFT_LEG,-1},  
   { LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG, RED(RIGHT_HAND),RIGHT_HAND, RED(LEFT_HAND), LEFT_HAND, -1 },
-  { LEFT_HAND, RIGHT_HAND, LEFT_LEG, RED(LEFT_KNEE), LEFT_LEG, LEFT_KNEE, RED(LEFT_LEG), LEFT_LEG, LEFT_KNEE, RED(LEFT_KNEE), LEFT_KNEE, -1},
+  
+  //problem 1
+  { LEFT_HAND, RIGHT_HAND, -1},
   { LEFT_HAND, RIGHT_HAND, RIGHT_LEG, RED(RIGHT_KNEE), RIGHT_LEG, RIGHT_KNEE, RED(RIGHT_LEG), RIGHT_LEG, RIGHT_KNEE, RED(RIGHT_KNEE), RIGHT_KNEE, -1},
   { LEFT_HAND, RIGHT_HAND, LEFT_LEG, RIGHT_LEG, RED(RIGHT_LEG), RED(RIGHT_LEG), RED(LEFT_LEG), RED(LEFT_LEG),-1 },
   {-1},
+  
+  //problem 2
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, RED(RIGHT_HAND), RED(LEFT_KNEE), RIGHT_HAND, LEFT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_LEG, RIGHT_LEG, RED(LEFT_HAND), RED(RIGHT_HAND), -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(RIGHT_HAND), RIGHT_HAND, RED(LEFT_HAND), LEFT_HAND, RED(LEFT_HAND), -1 },
+  
+  //problem 3
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, RED(RIGHT_HAND), RED(LEFT_KNEE), RIGHT_HAND, LEFT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), RED(RIGHT_HAND), RED(LEFT_KNEE),  -1 },
   { LEFT_KNEE, RIGHT_KNEE, RED(RIGHT_KNEE), RED(LEFT_KNEE), LEFT_KNEE, RIGHT_KNEE, -1},
   { LEFT_LEG, RIGHT_LEG, LEFT_KNEE, RIGHT_KNEE, RED(RIGHT_LEG), RIGHT_LEG, RED(LEFT_LEG), LEFT_LEG,  -1 },
+  
+  //problem 4
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_HAND, RIGHT_KNEE, RED(RIGHT_HAND), RED(LEFT_KNEE), RIGHT_HAND, LEFT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, -1 },
   { LEFT_HAND, RIGHT_HAND, LEFT_KNEE, RIGHT_KNEE, RED(LEFT_HAND), RED(RIGHT_KNEE), LEFT_KNEE, RIGHT_KNEE, -1 },
   {-1},
+  
+  //problem 5
   {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG, RED(LEFT_LEG), RED(LEFT_KNEE), LEFT_LEG, LEFT_KNEE,-1},
   {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG, RED(RIGHT_LEG), RED(RIGHT_KNEE), RIGHT_LEG, RIGHT_KNEE,-1},
   {-1},
   {-1},
+  
+  //problem 6
   {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG, RED(LEFT_HAND), RED(RIGHT_HAND), RED(LEFT_KNEE), RED(RIGHT_KNEE), RED(LEFT_LEG), RED(RIGHT_LEG),-1},
   {-1},
   {-1},
   {-1},
+
+  //problem 7
   {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG,-1},
   {-1},
   {-1},
   {-1},
-  
+
+  //problem 8
+  {-1},
+  {-1},
+  {-1},
+  {-1},
 };
 
 const int HOLD[TrainingPerProblem*PROBLEMS][MAX_STEPS] = {
-  { 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0},
+  //problem 0
+  { 0, 5, 0, 0, 0, 0, 0, 20, 0, 0, 0},
   { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 3, 0, 3, 0,0},  
   { 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 0 },
+  
+  //problem 1
   { 0, 0, 0, 0, 0, 30, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 0, 30, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 7, 2, 7, 2, 0},
   {0},
+  
+  //problem 2
   { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 7, 0, 0, 0, 7, 0},
   { 0, 0, 0, 0, 0, 0, 0, 5, 0},
   { 0, 0, 0, 0, 5, 0, 5, 0, 5, 0},
+  
+  //problem 3
   { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 0, 5, 0, 5, 0},
   { 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 5, 0, 5, 0,  0},
+  
+  //problem 4
   { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 7, 0, 0, 0, 7, 0},
   { 0, 0, 0, 0, 0, 0, 0, 30, 0 },
   {0},
+  
+  //problem 5
   {0, 0, 0, 0, 0, 0, 0, 25, 0, 0,-1},
   {0, 0, 0, 0, 0, 0, 0, 25, 0, 0,-1},
   {0},
   {0},
+  
+  //problem 6
   {0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0},
   {0},
   {0},
   {0},
+  
+  //problem 7
   {0, 0, 0, 0, 0, 5, 0},
+  {0},
+  {0},
+  {0},
+
+  //problem 8
+  {0},
   {0},
   {0},
   {0},
@@ -165,10 +206,12 @@ int totalSteps = MAX_STEPS;     // Will be adjusted per program
 int preStep = -1;
 int currentStep = PROGRAMS[currentProgram][0];
 int nextStep = -1;
+int oled_step = 0;
 int specialidx = -1;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
 unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
 bool ledStates[MAX_LEDS * 2] = {false};         // Track on/off state of each LED
+bool hold_flag = false;
 
 
 #ifdef DEBUG
@@ -223,7 +266,7 @@ void mat_init(){
 void blinkLed(int step, unsigned long currentTime, bool oppos) {
   int index = step;
   int physicalPin = ALL_LEDS[index];
-
+  oled_step = step;
   if (currentTime - blinkTimers[index] >= BLINK_INTERVAL) {
     ledStates[index] = !ledStates[index];
     digitalWrite(physicalPin, ledStates[index]);
@@ -370,14 +413,13 @@ void handleIdle() {
       Serial.println("Handle idle");
       delay(500);
   #endif
+
+  setProgram(currentProgram, true);
   
-  if (digitalRead(BUTTONS[0]) == LOW) { // Start program on button 0 press
-    setProgram(currentProgram);
-  }
 }
 
 void handleBlinkTarget(unsigned long currentTime) {
-
+  hold_flag = false;
   #ifdef DEBUG
       Serial.println("Blink Target");
       delay(500);
@@ -392,7 +434,10 @@ void handleBlinkTarget(unsigned long currentTime) {
         Serial.println("Blink Target red");
         delay(500);
       #endif
-      setLedSolid(currentStep, LOW); 
+      setLedSolid(currentStep, LOW);
+      if(HOLD[currentProgram][programStep]>0){
+        hold_flag = true; 
+      }
       currentState = WAIT_FOR_HOLD;
     }
   } 
@@ -402,22 +447,23 @@ void handleBlinkTarget(unsigned long currentTime) {
         Serial.println("Blink Target green");
         delay(500);
     #endif
-    setLedSolid(currentStep, LOW); 
+    setLedSolid(currentStep, LOW);
+    if(HOLD[currentProgram][programStep]>0){
+        hold_flag = true; 
+      } 
     currentState = WAIT_FOR_HOLD;
   }
 }
 
 void handleWaitForHold(unsigned long currentTime) {
+
+
   #ifdef DEBUG
         Serial.println("handle Wait");
         delay(500);
         Serial.print("HOLD: ");
         Serial.println(HOLD[currentProgram][programStep]);
   #endif
-
-  
-
-  
 
   if (programStep + 1 < totalSteps) {
     nextStep = PROGRAMS[currentProgram][programStep + 1];
@@ -465,7 +511,7 @@ void handleWaitForHold(unsigned long currentTime) {
         preStep = currentStep;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-
+        hold_flag = false;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
           Serial.print(currentStep);
@@ -511,6 +557,7 @@ void handleWaitForHold(unsigned long currentTime) {
       preStep = currentStep;
       currentStep = nextStep;
       */ 
+      hold_flag = false;
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
           Serial.print("Finished Normal button current:");
@@ -526,6 +573,7 @@ void handleWaitForHold(unsigned long currentTime) {
 }
 
 void handleVerifyNext() {
+  hold_flag = false;
   delay(HOLD_DURATION);
   #ifdef DEBUG
     Serial.println("Verify next");
@@ -630,7 +678,7 @@ void advanceStep() {
 
   if (programStep >= totalSteps || PROGRAMS[currentProgram][programStep] == -1) {
     celebrateCompletion();
-    currentProgram = (currentProgram + 1) % TRAININGS;
+    //currentProgram = (currentProgram + 1) % TRAININGS;
     currentState = IDLE;     // Start in idle
     programStep = 0;
     totalSteps = MAX_STEPS;     // Will be adjusted per program
@@ -659,7 +707,7 @@ void advanceStep() {
 
 }
 
-void setProgram(int programIndex) {
+void setProgram(int programIndex, bool start) {
   currentState = IDLE;     // Start in idle
   preStep = -1;
   nextStep = -1;
@@ -676,11 +724,21 @@ void setProgram(int programIndex) {
   }
   
   if(totalSteps !=0){
-    resetAllLEDs();
-    currentState = BLINK_TARGET;
+    resetAllLEDs(); 
   }
   else{
     currentState = IDLE;
+  }
+
+  if(start == true){
+    currentState = BLINK_TARGET;
+  }
+  else{
+    currentState = IDLE;     // Start in idle
+  }
+
+  if(PROGRAMS[currentProgram][0] == -1){
+    currentState = IDLE;     // Start in idle
   }
 
   #ifdef DEBUG
@@ -688,6 +746,16 @@ void setProgram(int programIndex) {
     Serial.println(currentProgram);
     Serial.print("Total steps");
     Serial.println(totalSteps);
+
+    Serial.print("State: ");
+    switch(currentState) {
+      case IDLE: Serial.print("IDLE"); break;
+      case BLINK_TARGET: Serial.print("BLINK_TARGET"); break;
+      case WAIT_FOR_HOLD: Serial.print("WAIT_FOR_HOLD"); break;
+      case VERIFY_NEXT: Serial.print("VERIFY_NEXT"); break;
+      case ERROR: Serial.print("ERROR"); break;
+    }
+
   #endif
 }
 

@@ -211,6 +211,7 @@ int specialidx = -1;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
 unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
 bool ledStates[MAX_LEDS * 2] = {false};         // Track on/off state of each LED
+bool hold_flag = false;
 
 
 #ifdef DEBUG
@@ -414,11 +415,12 @@ void handleIdle() {
   #endif
 
   setProgram(currentProgram, false);
+  resetAllLEDs();
   
 }
 
 void handleBlinkTarget(unsigned long currentTime) {
-
+  hold_flag = false;
   #ifdef DEBUG
       Serial.println("Blink Target");
       delay(500);
@@ -433,7 +435,10 @@ void handleBlinkTarget(unsigned long currentTime) {
         Serial.println("Blink Target red");
         delay(500);
       #endif
-      setLedSolid(currentStep, LOW); 
+      setLedSolid(currentStep, LOW);
+      if(HOLD[currentProgram][programStep]>0){
+        hold_flag = true; 
+      }
       currentState = WAIT_FOR_HOLD;
     }
   } 
@@ -443,22 +448,23 @@ void handleBlinkTarget(unsigned long currentTime) {
         Serial.println("Blink Target green");
         delay(500);
     #endif
-    setLedSolid(currentStep, LOW); 
+    setLedSolid(currentStep, LOW);
+    if(HOLD[currentProgram][programStep]>0){
+        hold_flag = true; 
+      } 
     currentState = WAIT_FOR_HOLD;
   }
 }
 
 void handleWaitForHold(unsigned long currentTime) {
+
+
   #ifdef DEBUG
         Serial.println("handle Wait");
         delay(500);
         Serial.print("HOLD: ");
         Serial.println(HOLD[currentProgram][programStep]);
   #endif
-
-  
-
-  
 
   if (programStep + 1 < totalSteps) {
     nextStep = PROGRAMS[currentProgram][programStep + 1];
@@ -506,7 +512,7 @@ void handleWaitForHold(unsigned long currentTime) {
         preStep = currentStep;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-
+        hold_flag = false;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
           Serial.print(currentStep);
@@ -552,6 +558,7 @@ void handleWaitForHold(unsigned long currentTime) {
       preStep = currentStep;
       currentStep = nextStep;
       */ 
+      hold_flag = false;
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
           Serial.print("Finished Normal button current:");
@@ -567,6 +574,7 @@ void handleWaitForHold(unsigned long currentTime) {
 }
 
 void handleVerifyNext() {
+  hold_flag = false;
   delay(HOLD_DURATION);
   #ifdef DEBUG
     Serial.println("Verify next");
@@ -671,7 +679,6 @@ void advanceStep() {
 
   if (programStep >= totalSteps || PROGRAMS[currentProgram][programStep] == -1) {
     celebrateCompletion();
-    //currentProgram = (currentProgram + 1) % TRAININGS;
     currentState = IDLE;     // Start in idle
     programStep = 0;
     totalSteps = MAX_STEPS;     // Will be adjusted per program
@@ -707,7 +714,7 @@ void setProgram(int programIndex, bool start) {
   specialidx = -1;
 
   // Validate program index
-  currentProgram = constrain(programIndex, 0, TRAININGS-1);
+  currentProgram = constrain(programIndex, 0, (TrainingPerProblem*PROBLEMS)-1);
   programStep = 0;
   currentStep = PROGRAMS[currentProgram][0];
   
@@ -717,8 +724,7 @@ void setProgram(int programIndex, bool start) {
   }
   
   if(totalSteps !=0){
-    resetAllLEDs();
-    
+    resetAllLEDs(); 
   }
   else{
     currentState = IDLE;
@@ -728,6 +734,10 @@ void setProgram(int programIndex, bool start) {
     currentState = BLINK_TARGET;
   }
   else{
+    currentState = IDLE;     // Start in idle
+  }
+
+  if(PROGRAMS[currentProgram][0] == -1){
     currentState = IDLE;     // Start in idle
   }
 

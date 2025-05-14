@@ -30,7 +30,6 @@ enum BodyPart {
 // ========================
 // 1. Define Training Programs
 // ========================
-#define TRAININGS           15   // Number of available programs
 #define MAX_STEPS           13   // Maximum steps per program
 #define PROBLEMS            9   // Maximum Number of problems
 #define TrainingPerProblem  4    // Maximum Number of problems
@@ -69,6 +68,7 @@ extern unsigned long lastBlinkTime;
 extern bool ledState;
 extern unsigned long errorStartTime;
 extern bool buttonStates[MAX_LEDS];
+extern bool hold_flag;
 
 // ==== Functions ====
 #ifdef DEBUG

@@ -13,8 +13,9 @@
 
 U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE); // Oled Object
 bool startmat=false;
+bool program_flag = true;
 
-char buffer[4];
+char buffer[10];
 /***************************************************************************/
 
 /* Menu Variables ***********************************************************/
@@ -188,19 +189,26 @@ void loop()
     delay(10);                                        // Debounce
     if ((digitalRead(OLED_BUTTON_SELECT_PIN) == LOW)) // Check if Button is still pressed
     {
+      setProgram((selected*n_items2) + selected2, false);
       if (current_screen == 0)
       {
         startmat = false;
+        program_flag = true;
         current_screen = 1;
       }
       else if (current_screen == 1)
       {
         startmat = true;
+        program_flag = true;
+        if(PROGRAMS[currentProgram][0] == -1){
+          program_flag = false;
+        }
         current_screen = 2;
       }
       else if (current_screen == 2)
       {
         startmat = false;
+        program_flag = true;
         current_screen = 0;
       }
     }
@@ -258,15 +266,15 @@ void loop()
       u8g2.drawStr(26, 15 + 0 * 22, problem_program[(selected*n_items2) + previous2]);
 
 
-      u8g2.drawXBMP(4, 2 + 0 * 22, icon_width_big, icon_height_big , menu_icons[previous]);
+      u8g2.drawXBMP(4, 2 + 0 * 22, icon_width_big, icon_height_big , menu_icons[previous2]);
 
       //Current
       u8g2.drawStr(26, 15 + 1 * 22, problem_program[(selected*n_items2) + selected2]);
-      u8g2.drawXBMP(4, 2 + 1 * 22, icon_width_big  , icon_height_big, menu_icons[selected]);
+      u8g2.drawXBMP(4, 2 + 1 * 22, icon_width_big  , icon_height_big, menu_icons[selected2]);
 
       //Next
       u8g2.drawStr(26, 15 + 2 * 22, problem_program[(selected*n_items2) + next2]);
-      u8g2.drawXBMP(4, 2 + 2 * 22, icon_width_big  , icon_height_big, menu_icons[next]);
+      u8g2.drawXBMP(4, 2 + 2 * 22, icon_width_big  , icon_height_big, menu_icons[next2]);
      
     
       // Selection outline
@@ -296,6 +304,47 @@ void loop()
           startmat = false;
         }
 
+        if(currentState == IDLE && program_flag == true){ //program end
+          u8g2.drawStr(10, FIRST_RAW, "Training");
+          u8g2.drawStr(1, SECOND_RAW, "finished!");
+          u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, correct_sign);
+          u8g2.setColorIndex(0); u8g2.drawBox(2, BAR, 124, 8);
+          u8g2.setColorIndex(1); u8g2.drawBox(2, BAR +1, 124, 6);
+          setProgram((selected*n_items2) + selected2, false);
+        }
+        else if(program_flag == false){
+          u8g2.drawStr(10, FIRST_RAW, "NO Training");
+          u8g2.drawStr(1, SECOND_RAW, "it'll be added!");
+          u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, happy_sign);
+          u8g2.setColorIndex(0); u8g2.drawBox(2, BAR, 124, 8);
+          u8g2.setColorIndex(1); u8g2.drawBox(2, BAR +1, 0, 6);
+          //setProgram((selected*n_items2) + selected2, false);
+        }
+        else{
+          if(hold_flag == false){
+            if(oled_step>=RED_OFFSET){
+              u8g2.drawStr(10, SECOND_RAW, "PULL!");
+              u8g2.drawStr(1, FIRST_RAW, body_part[oled_step-RED_OFFSET]);
+              u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, up_sign);
+            }
+            else{
+              u8g2.drawStr(10, SECOND_RAW, "PUSH!");
+              u8g2.drawStr(1, FIRST_RAW, body_part[oled_step]);
+              u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, down_sign);
+            }
+          }
+          else{
+            u8g2.drawStr(1, FIRST_RAW, "HOLD for");
+            sprintf(buffer, "%d", HOLD[currentProgram][programStep]);
+            strcat(buffer, " sec");
+            u8g2.drawStr(10, SECOND_RAW, buffer);
+            u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, clock_sign);
+          }
+        u8g2.setColorIndex(0); u8g2.drawBox(2, BAR, 124, 8);
+        u8g2.setColorIndex(1); u8g2.drawBox(2, BAR +1, 124 * (programStep/(float)totalSteps), 6);
+        }
+      
+
         u8g2.drawXBMP(0, 0, image_width_big, image_height_big, training_screen);
         u8g2.setFont(u8g_font_7x14);
         for(int i = 0; i < MAX_BAR_NUM; i++){
@@ -303,21 +352,6 @@ void loop()
           u8g2.drawStr(1+15*i, 10, buffer);
         }
 
-        if(oled_step>=RED_OFFSET){
-          u8g2.drawStr(10, SECOND_RAW, "PULL!");
-          u8g2.drawStr(1, FIRST_RAW, body_part[oled_step-RED_OFFSET]);
-          u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, up_sign);
-        }
-        else{
-          u8g2.drawStr(10, SECOND_RAW, "PUSH!");
-          u8g2.drawStr(1, FIRST_RAW, body_part[oled_step]);
-          u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, down_sign);
-        }
-
-        
-        
-        u8g2.setColorIndex(0); u8g2.drawBox(2, BAR, 124, 8);
-        u8g2.setColorIndex(1); u8g2.drawBox(2, BAR +1, 124 * (programStep/(float)totalSteps), 6);
       }
 
     }
