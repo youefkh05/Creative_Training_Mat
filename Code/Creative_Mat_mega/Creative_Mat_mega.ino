@@ -17,6 +17,7 @@ void setup() {
 void loop() {
   unsigned long currentTime = millis();
   
+
   switch(currentState) {
     case IDLE:        handleIdle(); break;
     case BLINK_TARGET: handleBlinkTarget(currentTime); break;
