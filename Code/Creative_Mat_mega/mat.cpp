@@ -200,7 +200,11 @@ void mat_init(){
     pinMode(BUTTONS[i], INPUT_PULLUP);
     pinMode(ALL_LEDS[i], OUTPUT);          // Green LEDs
     pinMode(ALL_LEDS[i + RED_OFFSET], OUTPUT); // Red LEDs
+    digitalWrite(ALL_LEDS[i], HIGH);
+    delay(500);
     digitalWrite(ALL_LEDS[i], LOW);
+    digitalWrite(ALL_LEDS[i + RED_OFFSET], HIGH);
+    delay(500);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], LOW);
   }
 
@@ -710,6 +714,24 @@ void celebrateCompletion() {
   }
 }
 
+void mat_loop(){
 
+  unsigned long currentTime = millis();
+        
+   switch(currentState) {
+      case IDLE:        handleIdle(); break;
+      case BLINK_TARGET: handleBlinkTarget(currentTime); break;
+      case WAIT_FOR_HOLD: handleWaitForHold(currentTime); break;
+      case VERIFY_NEXT: handleVerifyNext(); break;
+    }
+          
+    mat_checkerror();
+
+    #ifdef DEBUG
+      printState();
+      delay(100); // Prevent serial flooding
+    #endif
+
+}
 
 

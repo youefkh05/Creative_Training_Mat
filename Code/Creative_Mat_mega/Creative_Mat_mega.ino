@@ -15,22 +15,7 @@ void setup() {
 // loop() Section
 // ========================
 void loop() {
-  unsigned long currentTime = millis();
-  
-
-  switch(currentState) {
-    case IDLE:        handleIdle(); break;
-    case BLINK_TARGET: handleBlinkTarget(currentTime); break;
-    case WAIT_FOR_HOLD: handleWaitForHold(currentTime); break;
-    case VERIFY_NEXT: handleVerifyNext(); break;
-  }
-  
-  mat_checkerror();
-
-  #ifdef DEBUG
-    printState();
-    delay(100); // Prevent serial flooding
-  #endif
+  mat_loop();
 }
 
 /*

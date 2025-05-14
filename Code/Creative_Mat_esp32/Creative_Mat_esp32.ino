@@ -17,7 +17,7 @@ bool startmat=false;
 /***************************************************************************/
 
 /* Menu Variables ***********************************************************/
-const int n_items = 15;
+const int n_items = 11;
 
 const unsigned char *menu_icons[n_items] = {
     amm_bitmap,
@@ -31,30 +31,21 @@ const unsigned char *menu_icons[n_items] = {
     bitmap_icon_knob_over_oled,
     bitmap_icon_parksensor,
     bitmap_icon_turbo,
-    volt_bitmap,
-    ohm_bitmap,
-    sig_gen_bitmap,
-    config_bitmap
 };
 
 
-char items[n_items][25] = {
-    {"cat cow"},
-    {"child pose"},
-    {"straight leg raises"},
-    {"cross body stretch"},
-    {"piriforms stretch"},
-    {"heel raises"},
-    {"plank"},
-    {"push ups"},
-    {"squats"},
-    {"leg raises"},
-    {"lunges"},
-    {"1extra"},
-    {"2extra"},
-    {"3extra"},
+const char *items[n_items] = {
+    training_problem[0],
+    training_problem[1],
+    training_problem[2],
+    training_problem[3],
+    training_problem[4],
+    training_problem[5],
+    training_problem[6],
+    training_problem[7],
+    training_problem[8],
     {"connect device"},
-  };
+};
 
 int previous =0;
 int selected = 1;
