@@ -207,6 +207,7 @@ int preStep = -1;
 int currentStep = PROGRAMS[currentProgram][0];
 int nextStep = -1;
 int oled_step = 0;
+int blueidx = -1;
 int specialidx = -1;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
 unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
@@ -414,13 +415,16 @@ void handleIdle() {
       delay(500);
   #endif
 
+  blueidx = -1;
   setProgram(currentProgram, false);
   resetAllLEDs();
   
 }
 
 void handleBlinkTarget(unsigned long currentTime) {
+
   hold_flag = false;
+  blueidx = 0;
   #ifdef DEBUG
       Serial.println("Blink Target");
       delay(500);
@@ -437,6 +441,7 @@ void handleBlinkTarget(unsigned long currentTime) {
       #endif
       setLedSolid(currentStep, LOW);
       if(HOLD[currentProgram][programStep]>0){
+        blueidx = 1;
         hold_flag = true; 
       }
       currentState = WAIT_FOR_HOLD;
@@ -450,6 +455,7 @@ void handleBlinkTarget(unsigned long currentTime) {
     #endif
     setLedSolid(currentStep, LOW);
     if(HOLD[currentProgram][programStep]>0){
+        blueidx = 1;
         hold_flag = true; 
       } 
     currentState = WAIT_FOR_HOLD;
@@ -512,6 +518,7 @@ void handleWaitForHold(unsigned long currentTime) {
         preStep = currentStep;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
+        blueidx = -1;
         hold_flag = false;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
@@ -558,6 +565,7 @@ void handleWaitForHold(unsigned long currentTime) {
       preStep = currentStep;
       currentStep = nextStep;
       */ 
+      blueidx = -1;
       hold_flag = false;
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
@@ -574,6 +582,7 @@ void handleWaitForHold(unsigned long currentTime) {
 }
 
 void handleVerifyNext() {
+  blueidx = -1;
   hold_flag = false;
   delay(HOLD_DURATION);
   #ifdef DEBUG

@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include "mat.h"
 #include "oled.h"
+#include "blue.h"
 
 
 /* Global Variables *****************************************************************/
@@ -14,6 +15,7 @@
 U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE); // Oled Object
 bool startmat=false;
 bool program_flag = true;
+bool blue_wel_flag = false;
 
 char buffer[10];
 /***************************************************************************/
@@ -74,6 +76,7 @@ void setup()
   u8g2.setBitmapMode(1);
   u8g2.begin();
   mat_init();
+  BLUE_init();
 
   #ifdef DEBUG
     Serial.println("Start");
@@ -194,12 +197,14 @@ void loop()
       {
         startmat = false;
         program_flag = true;
+        blue_wel_flag = true;
         current_screen = 1;
       }
       else if (current_screen == 1)
       {
         startmat = true;
         program_flag = true;
+        blue_wel_flag = false;
         if(PROGRAMS[currentProgram][0] == -1){
           program_flag = false;
         }
@@ -209,6 +214,7 @@ void loop()
       {
         startmat = false;
         program_flag = true;
+        blue_wel_flag = true;
         current_screen = 0;
       }
     }
@@ -219,7 +225,7 @@ void loop()
     }
   }
   /* End of Buttons ****************************************************************************************/
-  
+
   /* OLED Section *******************************************************************************/
   u8g2.setAutoPageClear(1);
   u8g2.firstPage();
@@ -231,6 +237,8 @@ void loop()
   {
     if (current_screen == 0)
     {
+      BLUE_MAT_WEL(blue_wel_flag);
+      blue_wel_flag = false;
       u8g2.setFont(u8g_font_7x14);
 
       // Menu Items with icons
@@ -260,39 +268,57 @@ void loop()
     }
     else if (current_screen == 1)
     {
-      u8g2.setFont(u8g_font_7x14);
+      if (selected == (n_items-1))
+      {
+        u8g2.drawStr(2, BAR, "BlueTooth");
+        u8g2.drawStr(10, FIRST_RAW, "BLUE_NAME");
+        if(Bluetooth_serialESP.available()){
+          u8g2.drawStr(1, SECOND_RAW, "Connected :)");
+          BLUE_MAT_WEL(blue_wel_flag);
+          blue_wel_flag = false;
+        }
+        else{
+          u8g2.drawStr(1, SECOND_RAW, "Not connected :(");
+        }
+        
+        u8g2.drawXBMP(SIGN, BAR+12, icon_width_big  , icon_height_big, bitmap_icon_parksensor);
+      }
+      else{  
+        u8g2.setFont(u8g_font_7x14);
 
-      // Menu2 Items with icons
-      //Previous
-      u8g2.drawStr(26, 15 + 0 * 22, problem_program[(selected*n_items2) + previous2]);
+        // Menu2 Items with icons
+        //Previous
+        u8g2.drawStr(26, 15 + 0 * 22, problem_program[(selected*n_items2) + previous2]);
 
 
-      u8g2.drawXBMP(4, 2 + 0 * 22, icon_width_big, icon_height_big , menu_icons[previous2]);
+        u8g2.drawXBMP(4, 2 + 0 * 22, icon_width_big, icon_height_big , menu_icons[previous2]);
 
-      //Current
-      u8g2.drawStr(26, 15 + 1 * 22, problem_program[(selected*n_items2) + selected2]);
-      u8g2.drawXBMP(4, 2 + 1 * 22, icon_width_big  , icon_height_big, menu_icons[selected2]);
+        //Current
+        u8g2.drawStr(26, 15 + 1 * 22, problem_program[(selected*n_items2) + selected2]);
+        u8g2.drawXBMP(4, 2 + 1 * 22, icon_width_big  , icon_height_big, menu_icons[selected2]);
 
-      //Next
-      u8g2.drawStr(26, 15 + 2 * 22, problem_program[(selected*n_items2) + next2]);
-      u8g2.drawXBMP(4, 2 + 2 * 22, icon_width_big  , icon_height_big, menu_icons[next2]);
-     
-    
-      // Selection outline
-      u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
-      //Serial.println(items[selected]);
+        //Next
+        u8g2.drawStr(26, 15 + 2 * 22, problem_program[(selected*n_items2) + next2]);
+        u8g2.drawXBMP(4, 2 + 2 * 22, icon_width_big  , icon_height_big, menu_icons[next2]);
+      
+      
+        // Selection outline
+        u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
+        //Serial.println(items[selected]);
 
 
-      // Scrollbar
-      u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
-      u8g2.drawBox(125, (64 / n_items2) * selected2 + 6, 3, 8);
+        // Scrollbar
+        u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
+        u8g2.drawBox(125, (64 / n_items2) * selected2 + 6, 3, 8);
+      }
+
     }
     else if (current_screen == 2)
     {
       u8g2.setFont(u8g2_font_helvB08_tr); // consistent font
       u8g2.setColorIndex(1);              // white text
 
-      if (selected == (n_items-1))
+      if (false)
       {
         u8g2.drawXBMP(0, 0, image_width_big, image_height_big, training_screen);
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
