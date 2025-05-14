@@ -131,9 +131,9 @@ const int PROGRAMS[TrainingPerProblem*PROBLEMS][MAX_STEPS] = {
 
   //problem 7
   {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG,-1},
-  {-1},
-  {-1},
-  {-1},
+  {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), -1},
+  {LEFT_HAND, RIGHT_HAND,-1},
+  {LEFT_HAND, RIGHT_HAND, RED(LEFT_KNEE), RED(RIGHT_KNEE), LEFT_LEG, RIGHT_LEG,-1},
 
   //problem 8
   {-1},
@@ -187,9 +187,9 @@ const int HOLD[TrainingPerProblem*PROBLEMS][MAX_STEPS] = {
   
   //problem 7
   {0, 0, 0, 0, 0, 5, 0},
-  {0},
-  {0},
-  {0},
+  {0, 0, 0, -1},
+  {0, 0, 0},
+  {0, 5, 0, 0, 0, 0, 0},
 
   //problem 8
   {0},
