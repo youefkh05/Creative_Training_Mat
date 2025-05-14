@@ -32,9 +32,9 @@ const unsigned char* const menu_icons[n_items] PROGMEM = {
     bitmap_icon_dashboard,
     bitmap_icon_battery,
     bitmap_icon_fireworks,
-    bitmap_icon_gps_speed,
     bitmap_icon_knob_over_oled,
     bitmap_icon_parksensor,
+    bitmap_icon_gps_speed
 };
 
 
@@ -202,13 +202,19 @@ void loop()
       }
       else if (current_screen == 1)
       {
-        startmat = true;
-        program_flag = true;
-        blue_wel_flag = false;
-        if(PROGRAMS[currentProgram][0] == -1){
-          program_flag = false;
+        
+        if(selected != (n_items-1)){
+          startmat = true;
+          program_flag = true;
+          if(PROGRAMS[currentProgram][0] == -1){
+            program_flag = false;
+          }
+          current_screen = 2;
         }
-        current_screen = 2;
+        else{
+          blue_wel_flag = true;
+          current_screen = 0;
+        }
       }
       else if (current_screen == 2)
       {
@@ -271,7 +277,7 @@ void loop()
       if (selected == (n_items-1))
       {
         u8g2.drawStr(2, BAR, "BlueTooth");
-        u8g2.drawStr(10, FIRST_RAW, "BLUE_NAME");
+        u8g2.drawStr(10, FIRST_RAW, BLUE_NAME);
         if(Bluetooth_serialESP.available()){
           u8g2.drawStr(1, SECOND_RAW, "Connected :)");
           BLUE_MAT_WEL(blue_wel_flag);
@@ -281,7 +287,7 @@ void loop()
           u8g2.drawStr(1, SECOND_RAW, "Not connected :(");
         }
         
-        u8g2.drawXBMP(SIGN, BAR+12, icon_width_big  , icon_height_big, bitmap_icon_parksensor);
+        u8g2.drawXBMP(SIGN, BAR-10, icon_width_big  , icon_height_big, bitmap_icon_gps_speed);
       }
       else{  
         u8g2.setFont(u8g_font_7x14);
