@@ -206,6 +206,7 @@ int totalSteps = MAX_STEPS;     // Will be adjusted per program
 int preStep = -1;
 int currentStep = PROGRAMS[currentProgram][0];
 int nextStep = -1;
+int oled_step = 0;
 int specialidx = -1;
 bool buttonStates[MAX_LEDS] = {LOW}; // Track button states for debouncing
 unsigned long blinkTimers[MAX_LEDS * 2] = {0};  // Track last blink time for each LED
@@ -264,7 +265,7 @@ void mat_init(){
 void blinkLed(int step, unsigned long currentTime, bool oppos) {
   int index = step;
   int physicalPin = ALL_LEDS[index];
-
+  oled_step = step;
   if (currentTime - blinkTimers[index] >= BLINK_INTERVAL) {
     ledStates[index] = !ledStates[index];
     digitalWrite(physicalPin, ledStates[index]);

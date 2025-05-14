@@ -16,7 +16,14 @@
 #define OLED_BUTTON_SELECT_PIN      35
 #define OLED_BUTTON_DOWN_PIN        36
 
-#define MAX_TEXT_NUM                14 //max letters on menu list
+/* screen constants*/
+
+#define MAX_TEXT_NUM                14 // max letters on menu list
+#define MAX_BAR_NUM                 9  // number of points on the bar
+#define FIRST_RAW                   40 // FIRST RAW y position
+#define SECOND_RAW                  55 // SECOND RAW y position
+#define BAR                         15 // progress bar y position
+#define SIGN                        80 // Sign x position
 
 void OLED_init(void);
 

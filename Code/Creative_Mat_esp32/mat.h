@@ -63,6 +63,8 @@ extern int totalSteps;
 extern int preStep;
 extern int currentStep;
 extern int nextStep;
+extern int oled_step;
+extern int specialidx;
 extern unsigned long lastBlinkTime;
 extern bool ledState;
 extern unsigned long errorStartTime;

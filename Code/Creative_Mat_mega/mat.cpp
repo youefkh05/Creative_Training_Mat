@@ -370,7 +370,7 @@ void handleIdle() {
       Serial.println("Handle idle");
       delay(500);
   #endif
-
+  
   if (digitalRead(BUTTONS[0]) == LOW) { // Start program on button 0 press
     setProgram(currentProgram);
   }

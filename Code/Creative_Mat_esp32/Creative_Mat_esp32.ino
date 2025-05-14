@@ -12,14 +12,9 @@
 /* Global Variables *****************************************************************/
 
 U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, SCL, SDA, U8X8_PIN_NONE); // Oled Object
-float  x=1.5;
-int AllData;
-// Struct to store all data initialization
-
-int current_sensor = 0; // Global Variable to quickly choose Depth Sensor
-bool measureData = true;          // Flag to measure data
 bool startmat=false;
 
+char buffer[4];
 /***************************************************************************/
 
 /* Menu Variables ***********************************************************/
@@ -61,17 +56,6 @@ int selected2 = 1;
 int next2 =2;
 int current_screen = 0;
 
-// temp measurements
-int temp_progress = 0; // temp_progress bar
-float temp = 24;       // depth_1iable to increase the temp_progress bar(in cm)
-char temp_buffer[10];  // temp_buffer to hold the converted number
-
-// water level measurements
-int progress = 0; // progress bar
-char buffer[10];  // Buffer to hold the converted number
-// water level_2 measurements
-int progress2 = 0; // progress bar
-char buffer2[10];  // Buffer to hold the converted number
 
 /*************************************************************************/
 
@@ -292,7 +276,7 @@ void loop()
 
       // Scrollbar
       u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
-      u8g2.drawBox(125, (64 / n_items2) * selected + 6, 3, 8);
+      u8g2.drawBox(125, (64 / n_items2) * selected2 + 6, 3, 8);
     }
     else if (current_screen == 2)
     {
@@ -301,28 +285,39 @@ void loop()
 
       if (selected == (n_items-1))
       {
-        dtostrf(x, 6, 2, buffer);
         u8g2.drawXBMP(0, 0, image_width_big, image_height_big, training_screen);
-        u8g2.drawStr(25, 55, buffer);
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
-        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, progress, 6);
       }
       else 
       {
-        //dtostrf(x, 6, 2, buffer2);
+
+        if(startmat == true){
+          setProgram((selected*n_items2) + selected2, true);
+          startmat = false;
+        }
+
         u8g2.drawXBMP(0, 0, image_width_big, image_height_big, training_screen);
         u8g2.setFont(u8g_font_7x14);
-        u8g2.drawStr(1, 10, "1");
-        u8g2.drawStr(1+8*2, 10, "2");
-        u8g2.drawStr(1, 40, "second raw");
-        u8g2.drawStr(10, 55, "third raw");
-        if(currentState == IDLE){
-          setProgram((selected*n_items2) + selected2, true);
+        for(int i = 0; i < MAX_BAR_NUM; i++){
+          sprintf(buffer, "%d", map(i,0,MAX_BAR_NUM-1,0,totalSteps));  
+          u8g2.drawStr(1+15*i, 10, buffer);
         }
-        //u8g2.drawStr(25, 55, buffer2);
-        u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
-        u8g2.setColorIndex(1); u8g2.drawBox(2, 16, 62, 6);
-        startmat = true;
+
+        if(oled_step>=RED_OFFSET){
+          u8g2.drawStr(10, SECOND_RAW, "PULL!");
+          u8g2.drawStr(1, FIRST_RAW, body_part[oled_step-RED_OFFSET]);
+          u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, up_sign);
+        }
+        else{
+          u8g2.drawStr(10, SECOND_RAW, "PUSH!");
+          u8g2.drawStr(1, FIRST_RAW, body_part[oled_step]);
+          u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, down_sign);
+        }
+
+        
+        
+        u8g2.setColorIndex(0); u8g2.drawBox(2, BAR, 124, 8);
+        u8g2.setColorIndex(1); u8g2.drawBox(2, BAR +1, 124 * (programStep/(float)totalSteps), 6);
       }
 
     }
