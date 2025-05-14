@@ -316,6 +316,9 @@ void loop()
         u8g2.drawStr(1+8*2, 10, "2");
         u8g2.drawStr(1, 40, "second raw");
         u8g2.drawStr(10, 55, "third raw");
+        if(currentState == IDLE){
+          setProgram((selected*n_items2) + selected2, true);
+        }
         //u8g2.drawStr(25, 55, buffer2);
         u8g2.setColorIndex(0); u8g2.drawBox(2, 15, 124, 8);
         u8g2.setColorIndex(1); u8g2.drawBox(2, 16, 62, 6);

@@ -88,7 +88,7 @@ void handleError(unsigned long currentTime);
 void mat_checkerror();
 
 void advanceStep();
-void setProgram(int programIndex);
+void setProgram(int programIndex, bool start);
 void triggerError(States &errorSourceState);
 void celebrateCompletion();
 
