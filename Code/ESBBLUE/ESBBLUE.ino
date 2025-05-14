@@ -1,10 +1,10 @@
-#include "BluetoothSerial.h"
+#include "blue.h"
 
-BluetoothSerial Bluetooth_serialESP;
+
 char cmd;
 void setup() {
   // put your setup code here, to run once:
-  Bluetooth_serialESP.begin("ESP32-BT");
+  BLUE_init();
   pinMode(2,OUTPUT);
 }
 
