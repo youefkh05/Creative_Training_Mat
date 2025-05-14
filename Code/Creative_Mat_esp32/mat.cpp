@@ -11,9 +11,9 @@ const char training_problem[PROBLEMS][26]={
   {"Core exercises"},
   {"Knee pain"},
   {"Kyphosis"},
-  {"Lumbar flattening"},
-  {"Mechanical low back pain"},
-  {"piriforms stretch"},
+  {"Lumbar flat"},
+  {"low back pain"},
+  {"pirifrms strch"},
   {"plank"},
   {"push ups"},
   {"Extra"},
@@ -23,7 +23,7 @@ const char problem_program[TrainingPerProblem*PROBLEMS][26]={
   //problem 0
   {"Bear plank"},
   {"Bird-Dog"},
-  {"Mountain climbers"},
+  {"Mountin climbr"},
   {"Shoulder taps"},
 
   //problem 1
@@ -35,8 +35,8 @@ const char problem_program[TrainingPerProblem*PROBLEMS][26]={
   //problem 2
   {"Bird-Dog"},
   {"Cat cow"},
-  {"Scapular cat push ups"},
-  {"Thread the needle"},
+  {"Scapular cat"},
+  {"Thread needle"},
 
   //problem 3
   {"Bird-Dog"},
@@ -51,14 +51,14 @@ const char problem_program[TrainingPerProblem*PROBLEMS][26]={
   {"Extra1"},
 
   //problem 5
-  {"Piriformis Stretch"},
+  {"pirifrms strch"},
   {"Extra1"},
   {"Extra2"},
   {"Extra3"},
 
   //problem 6
-  {"Plank Exercise L"},
-  {"Plank Exercise R"},
+  {"Plank L"},
+  {"Plank R"},
   {"Extra2"},
   {"Extra3"},
 

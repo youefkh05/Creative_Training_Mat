@@ -1,3 +1,9 @@
+#define ESP32 
+
+#ifdef ESP32
+  #define PROGMEM
+#endif
+
 #include <Arduino.h>
 #include "mat.h"
 #include "oled.h"
@@ -17,9 +23,10 @@ bool startmat=false;
 /***************************************************************************/
 
 /* Menu Variables ***********************************************************/
-const int n_items = 11;
+const int n_items = 10;
+const int n_items2 = TrainingPerProblem;
 
-const unsigned char *menu_icons[n_items] = {
+const unsigned char* const menu_icons[n_items] PROGMEM = {
     amm_bitmap,
     menu_icon_battery,
     menu_icon_temp,
@@ -30,7 +37,6 @@ const unsigned char *menu_icons[n_items] = {
     bitmap_icon_gps_speed,
     bitmap_icon_knob_over_oled,
     bitmap_icon_parksensor,
-    bitmap_icon_turbo,
 };
 
 
@@ -50,6 +56,9 @@ const char *items[n_items] = {
 int previous =0;
 int selected = 1;
 int next =2;
+int previous2 =0;
+int selected2 = 1;
+int next2 =2;
 int current_screen = 0;
 
 // temp measurements
@@ -65,6 +74,9 @@ int progress2 = 0; // progress bar
 char buffer2[10];  // Buffer to hold the converted number
 
 /*************************************************************************/
+
+
+/* end of helper functions*/
 
 void setup()
 {
@@ -140,6 +152,52 @@ void loop()
 
   }
 
+  if (current_screen == 1)
+  {
+    //* Up Button
+    if (digitalRead(OLED_BUTTON_UP_PIN) == LOW) // Check if Button is pressed
+    {
+      delay(10);                                  // Debounce
+      if (digitalRead(OLED_BUTTON_UP_PIN) == LOW) // Check if Button is still pressed
+      {
+        selected2 = selected2 - 1;
+        if (selected2 < 0)
+        {
+          selected2 = n_items2 - 1;
+        }
+      }
+      //Serial.println("Up Button Pressed");
+      while (digitalRead(OLED_BUTTON_UP_PIN) == LOW)
+      {
+        // Wait for Button Release
+      }
+    }
+
+    //* Down Button
+    if (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW) // Check if Button is pressed
+    {
+      delay(10);                                    // Debounce
+      if (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW) // Check if Button is still pressed
+      {
+        selected2 = selected2 + 1;
+        if (selected2 == n_items2)
+        {
+          selected2 = 0;
+        }
+      }
+
+      while (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW)
+      {
+        // Wait for Button Release
+      }
+    }
+
+    // Compute previous and next safely
+    previous2 = (selected2 + n_items2 - 1) % n_items2;
+    next2 = (selected2 + 1) % n_items2;
+
+  }
+
   //* Enter Button
   if ((digitalRead(OLED_BUTTON_SELECT_PIN) == LOW)) // Check if Button is pressed
   {
@@ -148,10 +206,15 @@ void loop()
     {
       if (current_screen == 0)
       {
-        startmat = true;
+        startmat = false;
         current_screen = 1;
       }
       else if (current_screen == 1)
+      {
+        startmat = true;
+        current_screen = 2;
+      }
+      else if (current_screen == 2)
       {
         startmat = false;
         current_screen = 0;
@@ -204,6 +267,35 @@ void loop()
     }
     else if (current_screen == 1)
     {
+      u8g2.setFont(u8g_font_7x14);
+
+      // Menu2 Items with icons
+      //Previous
+      u8g2.drawStr(26, 15 + 0 * 22, problem_program[(selected*n_items2) + previous2]);
+
+
+      u8g2.drawXBMP(4, 2 + 0 * 22, icon_width_big, icon_height_big , menu_icons[previous]);
+
+      //Current
+      u8g2.drawStr(26, 15 + 1 * 22, problem_program[(selected*n_items2) + selected2]);
+      u8g2.drawXBMP(4, 2 + 1 * 22, icon_width_big  , icon_height_big, menu_icons[selected]);
+
+      //Next
+      u8g2.drawStr(26, 15 + 2 * 22, problem_program[(selected*n_items2) + next2]);
+      u8g2.drawXBMP(4, 2 + 2 * 22, icon_width_big  , icon_height_big, menu_icons[next]);
+     
+    
+      // Selection outline
+      u8g2.drawXBMP(0, 22, 128, 20, menu_sel_outline);
+      //Serial.println(items[selected]);
+
+
+      // Scrollbar
+      u8g2.drawXBMP(120, 0, 8, 64, menu_scrollbar_bckg);
+      u8g2.drawBox(125, (64 / n_items2) * selected + 6, 3, 8);
+    }
+    else if (current_screen == 2)
+    {
       u8g2.setFont(u8g2_font_helvB08_tr); // consistent font
       u8g2.setColorIndex(1);              // white text
 
@@ -244,3 +336,4 @@ void loop()
   /* Send Data to web server **********************************************************************/
 
 }
+

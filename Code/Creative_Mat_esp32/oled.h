@@ -16,6 +16,8 @@
 #define OLED_BUTTON_SELECT_PIN      35
 #define OLED_BUTTON_DOWN_PIN        36
 
+#define MAX_TEXT_NUM                14 //max letters on menu list
+
 void OLED_init(void);
 
 #endif
