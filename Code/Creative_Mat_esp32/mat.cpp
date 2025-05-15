@@ -441,12 +441,13 @@ void handleBlinkTarget(unsigned long currentTime) {
       #endif
       setLedSolid(currentStep, LOW);
       if(HOLD[currentProgram][programStep]>0){
-        blueidx = 1;
         hold_flag = true; 
       }
+      blueidx =1;
       currentState = WAIT_FOR_HOLD;
     }
   } 
+
   // GREEN LED (press): wait for button to be HIGH
   else if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == LOW) {
     #ifdef DEBUG
@@ -455,15 +456,16 @@ void handleBlinkTarget(unsigned long currentTime) {
     #endif
     setLedSolid(currentStep, LOW);
     if(HOLD[currentProgram][programStep]>0){
-        blueidx = 1;
         hold_flag = true; 
       } 
+    blueidx = 1;  
     currentState = WAIT_FOR_HOLD;
   }
 }
 
 void handleWaitForHold(unsigned long currentTime) {
 
+  blueidx = -1;
 
   #ifdef DEBUG
         Serial.println("handle Wait");
@@ -518,7 +520,7 @@ void handleWaitForHold(unsigned long currentTime) {
         preStep = currentStep;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-        blueidx = -1;
+        blueidx = 1;
         hold_flag = false;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
@@ -565,7 +567,7 @@ void handleWaitForHold(unsigned long currentTime) {
       preStep = currentStep;
       currentStep = nextStep;
       */ 
-      blueidx = -1;
+      blueidx = 1;
       hold_flag = false;
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
@@ -577,6 +579,7 @@ void handleWaitForHold(unsigned long currentTime) {
       #endif  
     }
   } else {
+    blueidx=3;
     advanceStep();
   }
 }
@@ -595,6 +598,7 @@ void handleVerifyNext() {
     : (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == LOW);
 
   if (nextButtonOk) {
+    blueidx=3;
     advanceStep();
   } else {
     triggerError(currentState);

@@ -278,7 +278,7 @@ void loop()
       {
         u8g2.drawStr(2, BAR, "BlueTooth");
         u8g2.drawStr(10, FIRST_RAW, BLUE_NAME);
-        if(Bluetooth_serialESP.available()){
+        if(Bluetooth_serialESP.connected()){
           u8g2.drawStr(1, SECOND_RAW, "Connected :)");
           BLUE_MAT_WEL(blue_wel_flag);
           blue_wel_flag = false;
@@ -336,6 +336,9 @@ void loop()
           setProgram((selected*n_items2) + selected2, true);
           startmat = false;
         }
+
+        BLUE_MAT(program_flag, blue_wel_flag);
+        //blue_wel_flag = false;
 
         if(currentState == IDLE && program_flag == true){ //program end
           u8g2.drawStr(10, FIRST_RAW, "Training");

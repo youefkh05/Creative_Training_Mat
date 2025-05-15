@@ -12,12 +12,12 @@
 /* BLUE TEXT START */
 #define BLUE_NAME "Creative-MAT"
 #define MAT_LINK "https://drive.google.com/drive/folders/1YBFMJKyItKko7F_0Hsu1N62fj0dlx9bX?usp=sharing"
-#define BLUE_WELCOME "Welcome to creative map!\n hope you have fun :)"
-#define MAT_EXTRA_MES "🎁 Extra preview done! More exciting stuff coming your way! 😉"
+#define BLUE_WELCOME "Welcome to creative map!\n hope you have fun :)\n"
+#define MAT_EXTRA_MES "🎁 Extra preview done! More exciting stuff coming your way! 😉\n"
 
 extern const char* driveLinks[];
 extern const char* training_messages[];
-//extern const char* program_finish_messages[];
+extern const char* program_finish_messages[];
 /* BLUE TEXT END */
 
 /* global variables*/
@@ -35,7 +35,7 @@ void BLUE_Problem_intro(int problemidx);
 
 void BLUE_Problem_outro(int problemidx);
 
-void BLUE_MAT(bool program_flag);
+void BLUE_MAT(bool program_flag, bool blue_wel_flag);
 
 void BLUE_MAT_WEL(bool program_flag);
 
