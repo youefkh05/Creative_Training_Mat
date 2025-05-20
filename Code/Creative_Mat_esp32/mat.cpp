@@ -404,7 +404,7 @@ void triggerError(States &errorSourceState) {
   #ifdef DEBUG
       Serial.print("Trigger Error state:");
       Serial.println(errorSourceState);
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 }
 
@@ -412,9 +412,8 @@ void handleIdle() {
 
   #ifdef DEBUG
       Serial.println("Handle idle");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
-
   blueidx = -1;
   setProgram(currentProgram, false);
   resetAllLEDs();
@@ -422,22 +421,24 @@ void handleIdle() {
 }
 
 void handleBlinkTarget(unsigned long currentTime) {
-
   hold_flag = false;
   blueidx = 0;
   #ifdef DEBUG
       Serial.println("Blink Target");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 
   blinkLed(currentStep, currentTime, LOW); // Always turn off opposite LED
   
   // RED LED (release): wait for button to be LOW
   if (currentStep >= RED_OFFSET) {
+    vTaskDelay(2000 /portTICK_PERIOD_MS);
     if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == HIGH) {
+
+    //if (true) {
       #ifdef DEBUG
         Serial.println("Blink Target red");
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif
       setLedSolid(currentStep, LOW);
       if(HOLD[currentProgram][programStep]>0){
@@ -447,18 +448,20 @@ void handleBlinkTarget(unsigned long currentTime) {
       currentState = WAIT_FOR_HOLD;
     }
   } 
-
   // GREEN LED (press): wait for button to be HIGH
-  else if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == LOW) {
+  //else if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == LOW) {
+  else if (true) {
     #ifdef DEBUG
         Serial.println("Blink Target green");
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
     setLedSolid(currentStep, LOW);
+    vTaskDelay(2000 /portTICK_PERIOD_MS);
+
     if(HOLD[currentProgram][programStep]>0){
         hold_flag = true; 
       } 
-    blueidx = 1;  
+    blueidx =1;
     currentState = WAIT_FOR_HOLD;
   }
 }
