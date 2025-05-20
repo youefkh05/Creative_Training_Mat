@@ -433,9 +433,9 @@ void handleBlinkTarget(unsigned long currentTime) {
   // RED LED (release): wait for button to be LOW
   if (currentStep >= RED_OFFSET) {
     vTaskDelay(2000 /portTICK_PERIOD_MS);
-    if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == HIGH) {
+    //if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == HIGH) {
 
-    //if (true) {
+    if (true) {
       #ifdef DEBUG
         Serial.println("Blink Target red");
         vTaskDelay(500 / portTICK_PERIOD_MS);

@@ -68,16 +68,18 @@ int current_screen = 0;
 
 void setup()
 {
+  delay(1000);  // wait for USB serial to stabilize
   #ifdef DEBUG
     delay(1000);
     Serial.begin(115200);
     //disableCore0WDT();
     //disableCore1WDT();
     Serial.printf("Setup function\n");
-    
+    esp_task_wdt_deinit();
   #endif
+  esp_task_wdt_deinit();
 
-
+  delay(10); // Let system breathe
   OLED_init();
 
   /*Oled Config*/
