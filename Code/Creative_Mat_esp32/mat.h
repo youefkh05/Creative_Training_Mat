@@ -7,6 +7,7 @@
 #define MAT_H
 
 #include <Arduino.h>
+#include "esp_task_wdt.h"
 
 // ==== Enum for State Machine ====
 enum States {
@@ -30,6 +31,7 @@ enum BodyPart {
 // ========================
 // 1. Define Training Programs
 // ========================
+#define TRAININGS           15   // Number of available programs
 #define MAX_STEPS           13   // Maximum steps per program
 #define PROBLEMS            9   // Maximum Number of problems
 #define TrainingPerProblem  4    // Maximum Number of problems

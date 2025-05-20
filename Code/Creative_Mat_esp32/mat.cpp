@@ -245,17 +245,17 @@ void mat_init(){
     pinMode(ALL_LEDS[i], OUTPUT);          // Green LEDs
     pinMode(ALL_LEDS[i + RED_OFFSET], OUTPUT); // Red LEDs
     digitalWrite(ALL_LEDS[i], HIGH);
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
     digitalWrite(ALL_LEDS[i], LOW);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], HIGH);
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], LOW);
   }
 
   #ifdef DEBUG
-    Serial.begin(9600);
+    //Serial.begin(115200);
     Serial.println("Init");
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
   #endif
   
 }
@@ -275,7 +275,7 @@ void blinkLed(int step, unsigned long currentTime, bool oppos) {
     #ifdef DEBUG
     Serial.print("Blink led:");
     Serial.println(index);
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
     #endif
     
 
@@ -288,7 +288,7 @@ void blinkLed(int step, unsigned long currentTime, bool oppos) {
       #ifdef DEBUG
       Serial.print("blink off led:");
       Serial.println(oppIndex);
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif
     }
 
@@ -304,7 +304,7 @@ void setLedSolid(int step, bool oppos) {
     #ifdef DEBUG
     Serial.print("set on led:");
     Serial.println(step);
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
     
 
@@ -316,7 +316,7 @@ void setLedSolid(int step, bool oppos) {
     #ifdef DEBUG
     Serial.print("set off led:");
     Serial.println(oppIndex);
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
 
     digitalWrite(oppositeColorPin, LOW);
@@ -333,7 +333,7 @@ void resetLedSolid(int step, bool oppos) {
     #ifdef DEBUG
     Serial.print("reset off led:");
     Serial.println(step);
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
 
     // Turn on opposite color (When needed)
@@ -345,7 +345,7 @@ void resetLedSolid(int step, bool oppos) {
       #ifdef DEBUG
       Serial.print("reset on led:");
       Serial.println(oppIndex);
-      delay(500);
+      vTaskDelay(500/ portTICK_PERIOD_MS);
       #endif
     }
 
@@ -355,7 +355,7 @@ void resetAllLEDs() {
 
   #ifdef DEBUG
       Serial.println("reset all leds:");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 
   for (int i = 0; i < MAX_LEDS*2; i++) {
@@ -371,7 +371,7 @@ bool isButtonPressed(int buttonIndex) {
 
   #ifdef DEBUG
       Serial.println("button pressed");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 
   bool reading = digitalRead(BUTTONS[buttonIndex]);

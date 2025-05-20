@@ -1,7 +1,7 @@
 #include "mat.h"
 
 // Pin Definitions
-const int BUTTONS[] = {2, 3, 4, 5, 12, 13};  // B1-B6 (LOW when pressed)
+const int BUTTONS[] = {7, 7, 7, 7, 7, 7};  // B1-B6 (LOW when pressed)
 // 0 → LEFT_HAND, 1 → RIGHT_HAND, 2 → LEFT_KNEE, 3 → RIGHT_KNEE, 4 → LEFT_LEG 5 →RIGHT_LEG
   
 
@@ -245,17 +245,17 @@ void mat_init(){
     pinMode(ALL_LEDS[i], OUTPUT);          // Green LEDs
     pinMode(ALL_LEDS[i + RED_OFFSET], OUTPUT); // Red LEDs
     digitalWrite(ALL_LEDS[i], HIGH);
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
     digitalWrite(ALL_LEDS[i], LOW);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], HIGH);
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], LOW);
   }
 
   #ifdef DEBUG
-    Serial.begin(9600);
+    //Serial.begin(115200);
     Serial.println("Init");
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
   #endif
   
 }
@@ -275,7 +275,7 @@ void blinkLed(int step, unsigned long currentTime, bool oppos) {
     #ifdef DEBUG
     Serial.print("Blink led:");
     Serial.println(index);
-    delay(500);
+    vTaskDelay(500/ portTICK_PERIOD_MS);
     #endif
     
 
@@ -288,7 +288,7 @@ void blinkLed(int step, unsigned long currentTime, bool oppos) {
       #ifdef DEBUG
       Serial.print("blink off led:");
       Serial.println(oppIndex);
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif
     }
 
@@ -304,7 +304,7 @@ void setLedSolid(int step, bool oppos) {
     #ifdef DEBUG
     Serial.print("set on led:");
     Serial.println(step);
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
     
 
@@ -316,7 +316,7 @@ void setLedSolid(int step, bool oppos) {
     #ifdef DEBUG
     Serial.print("set off led:");
     Serial.println(oppIndex);
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
 
     digitalWrite(oppositeColorPin, LOW);
@@ -333,7 +333,7 @@ void resetLedSolid(int step, bool oppos) {
     #ifdef DEBUG
     Serial.print("reset off led:");
     Serial.println(step);
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
 
     // Turn on opposite color (When needed)
@@ -345,7 +345,7 @@ void resetLedSolid(int step, bool oppos) {
       #ifdef DEBUG
       Serial.print("reset on led:");
       Serial.println(oppIndex);
-      delay(500);
+      vTaskDelay(500/ portTICK_PERIOD_MS);
       #endif
     }
 
@@ -355,7 +355,7 @@ void resetAllLEDs() {
 
   #ifdef DEBUG
       Serial.println("reset all leds:");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 
   for (int i = 0; i < MAX_LEDS*2; i++) {
@@ -371,7 +371,7 @@ bool isButtonPressed(int buttonIndex) {
 
   #ifdef DEBUG
       Serial.println("button pressed");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 
   bool reading = digitalRead(BUTTONS[buttonIndex]);
@@ -404,7 +404,7 @@ void triggerError(States &errorSourceState) {
   #ifdef DEBUG
       Serial.print("Trigger Error state:");
       Serial.println(errorSourceState);
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 }
 
@@ -412,9 +412,8 @@ void handleIdle() {
 
   #ifdef DEBUG
       Serial.println("Handle idle");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
-
   blueidx = -1;
   setProgram(currentProgram, false);
   resetAllLEDs();
@@ -422,52 +421,57 @@ void handleIdle() {
 }
 
 void handleBlinkTarget(unsigned long currentTime) {
-
   hold_flag = false;
   blueidx = 0;
   #ifdef DEBUG
       Serial.println("Blink Target");
-      delay(500);
+      vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif
 
   blinkLed(currentStep, currentTime, LOW); // Always turn off opposite LED
   
   // RED LED (release): wait for button to be LOW
   if (currentStep >= RED_OFFSET) {
+    vTaskDelay(2000 /portTICK_PERIOD_MS);
     if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == HIGH) {
+
+    //if (true) {
       #ifdef DEBUG
         Serial.println("Blink Target red");
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif
       setLedSolid(currentStep, LOW);
       if(HOLD[currentProgram][programStep]>0){
-        blueidx = 1;
         hold_flag = true; 
       }
+      blueidx =1;
       currentState = WAIT_FOR_HOLD;
     }
   } 
   // GREEN LED (press): wait for button to be HIGH
-  else if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == LOW) {
+  //else if (digitalRead(BUTTONS[currentStep % MAX_LEDS]) == LOW) {
+  else if (true) {
     #ifdef DEBUG
         Serial.println("Blink Target green");
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif
     setLedSolid(currentStep, LOW);
+    vTaskDelay(2000 /portTICK_PERIOD_MS);
+
     if(HOLD[currentProgram][programStep]>0){
-        blueidx = 1;
         hold_flag = true; 
       } 
+    blueidx =1;
     currentState = WAIT_FOR_HOLD;
   }
 }
 
 void handleWaitForHold(unsigned long currentTime) {
 
-
+  blueidx = -1;
   #ifdef DEBUG
         Serial.println("handle Wait");
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
         Serial.print("HOLD: ");
         Serial.println(HOLD[currentProgram][programStep]);
   #endif
@@ -485,7 +489,7 @@ void handleWaitForHold(unsigned long currentTime) {
   #ifdef DEBUG
         Serial.print("handle Wait next");
         Serial.println(nextStep);
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif  
 
   if (nextStep != -1) {
@@ -499,11 +503,11 @@ void handleWaitForHold(unsigned long currentTime) {
         Serial.print(currentStep);
         Serial.print("Special same button next:");
         Serial.println(nextStep);
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif  
 
-      delay(1000*HOLD[currentProgram][programStep]);
-      
+      vTaskDelay(1000*HOLD[currentProgram][programStep] /portTICK_PERIOD_MS);
+      vTaskDelay(1000/portTICK_PERIOD_MS);
       blinkLed(nextStep, currentTime, HIGH);
       
       
@@ -514,18 +518,19 @@ void handleWaitForHold(unsigned long currentTime) {
         : !digitalRead(BUTTONS[nextStep % MAX_LEDS]);  // Green: button pressed
 
       if (nextButtonReady) {
+      //if (true){ 
         programStep++;
         preStep = currentStep;
+        blueidx = 1;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-        blueidx = -1;
         hold_flag = false;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
           Serial.print(currentStep);
           Serial.print("Special same button next:");
           Serial.println(nextStep);
-          delay(500);
+          vTaskDelay(500 / portTICK_PERIOD_MS);
          #endif  
       }
       return;
@@ -537,22 +542,24 @@ void handleWaitForHold(unsigned long currentTime) {
           Serial.print(currentStep);
           Serial.print("Normal button next:");
           Serial.println(nextStep);
-          delay(500);
+          vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif  
     
     setLedSolid(currentStep, HIGH);
-    delay(1000*HOLD[currentProgram][programStep]);
+    vTaskDelay(1000*HOLD[currentProgram][programStep] /portTICK_PERIOD_MS);
+    vTaskDelay(1000 /portTICK_PERIOD_MS);
     // Check current button state validity
     bool currentButtonValid = (currentStep >= RED_OFFSET) 
       ? digitalRead(BUTTONS[currentStep % MAX_LEDS])  // Red: released
       : !digitalRead(BUTTONS[currentStep % MAX_LEDS]);  // Green: pressed
     
     blinkLed(nextStep, currentTime, HIGH);
-
+    /*
     if (!currentButtonValid) {
       triggerError(currentState);
       return;
     }
+    */
 
     // Check next button initiation
     bool nextButtonInitiated = (nextStep >= RED_OFFSET)
@@ -560,12 +567,13 @@ void handleWaitForHold(unsigned long currentTime) {
       : !digitalRead(BUTTONS[nextStep % MAX_LEDS]);  // Green: pressed
 
     if (nextButtonInitiated) {
+      //if (true) {
       /*
       programStep++;
       preStep = currentStep;
       currentStep = nextStep;
       */ 
-      blueidx = -1;
+      blueidx = 1;
       hold_flag = false;
       currentState = VERIFY_NEXT;
       #ifdef DEBUG
@@ -573,18 +581,19 @@ void handleWaitForHold(unsigned long currentTime) {
           Serial.println(currentStep);
           Serial.print("Normal next:");
           Serial.println(nextStep);
-          delay(500);
+          vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif  
     }
-  } else {
+  }else {
+    blueidx=3;
     advanceStep();
   }
 }
 
 void handleVerifyNext() {
-  blueidx = -1;
   hold_flag = false;
-  delay(HOLD_DURATION);
+  blueidx=-1;
+  vTaskDelay(HOLD_DURATION/portTICK_PERIOD_MS);
   #ifdef DEBUG
     Serial.println("Verify next");
   #endif  
@@ -594,7 +603,10 @@ void handleVerifyNext() {
     ? (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == HIGH)
     : (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == LOW);
 
+  vTaskDelay(500 / portTICK_PERIOD_MS);
   if (nextButtonOk) {
+  //if (true) {
+    blueidx=3;
     advanceStep();
   } else {
     triggerError(currentState);
@@ -660,7 +672,7 @@ void mat_checkerror() {
               Serial.println(programStep);
               Serial.print("currentStep:");
               Serial.println(step);
-              delay(500);
+              vTaskDelay(500 / portTICK_PERIOD_MS);
             #endif  
             return;
           }
@@ -688,6 +700,7 @@ void advanceStep() {
 
   if (programStep >= totalSteps || PROGRAMS[currentProgram][programStep] == -1) {
     celebrateCompletion();
+    //currentProgram = (currentProgram + 1) % TRAININGS;
     currentState = IDLE;     // Start in idle
     programStep = 0;
     totalSteps = MAX_STEPS;     // Will be adjusted per program
@@ -755,6 +768,16 @@ void setProgram(int programIndex, bool start) {
     Serial.println(currentProgram);
     Serial.print("Total steps");
     Serial.println(totalSteps);
+
+    Serial.print("State: ");
+    switch(currentState) {
+      case IDLE: Serial.print("IDLE"); break;
+      case BLINK_TARGET: Serial.print("BLINK_TARGET"); break;
+      case WAIT_FOR_HOLD: Serial.print("WAIT_FOR_HOLD"); break;
+      case VERIFY_NEXT: Serial.print("VERIFY_NEXT"); break;
+      case ERROR: Serial.print("ERROR"); break;
+    }
+
   #endif
 }
 
@@ -768,7 +791,7 @@ void celebrateCompletion() {
       ledStates[led] = HIGH;
       digitalWrite(ALL_LEDS[led], HIGH);
     }
-    delay(flashDuration);
+    vTaskDelay(flashDuration/portTICK_PERIOD_MS);
     resetAllLEDs();
     
     // Red flash
@@ -776,12 +799,14 @@ void celebrateCompletion() {
        ledStates[led + RED_OFFSET] = HIGH;
       digitalWrite(ALL_LEDS[led + RED_OFFSET], HIGH);
     }
-    delay(flashDuration);
+    vTaskDelay(flashDuration /portTICK_PERIOD_MS);
     resetAllLEDs();
   }
 }
 
 void mat_loop(){
+
+  //yield();   // Let the ESP32 background tasks run
 
   unsigned long currentTime = millis();
         
@@ -792,11 +817,12 @@ void mat_loop(){
       case VERIFY_NEXT: handleVerifyNext(); break;
     }
           
-    mat_checkerror();
+    //mat_checkerror();
 
     #ifdef DEBUG
-      printState();
-      delay(100); // Prevent serial flooding
+      Serial.println("MAT Loop running...");
+      printState();      
+      vTaskDelay(100 /portTICK_PERIOD_MS); // Prevent serial flooding
     #endif
 
 }
