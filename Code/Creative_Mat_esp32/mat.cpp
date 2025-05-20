@@ -591,9 +591,9 @@ void handleWaitForHold(unsigned long currentTime) {
 }
 
 void handleVerifyNext() {
-  blueidx = -1;
   hold_flag = false;
-  delay(HOLD_DURATION);
+  blueidx=-1;
+  vTaskDelay(HOLD_DURATION/portTICK_PERIOD_MS);
   #ifdef DEBUG
     Serial.println("Verify next");
   #endif  
@@ -603,13 +603,16 @@ void handleVerifyNext() {
     ? (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == HIGH)
     : (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == LOW);
 
+  vTaskDelay(500 / portTICK_PERIOD_MS);
   if (nextButtonOk) {
+  //if (true) {
     blueidx=3;
     advanceStep();
   } else {
     triggerError(currentState);
   }
 }
+
 
 
 void mat_checkerror() {
