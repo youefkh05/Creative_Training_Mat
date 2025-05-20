@@ -469,10 +469,9 @@ void handleBlinkTarget(unsigned long currentTime) {
 void handleWaitForHold(unsigned long currentTime) {
 
   blueidx = -1;
-
   #ifdef DEBUG
         Serial.println("handle Wait");
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
         Serial.print("HOLD: ");
         Serial.println(HOLD[currentProgram][programStep]);
   #endif
@@ -490,7 +489,7 @@ void handleWaitForHold(unsigned long currentTime) {
   #ifdef DEBUG
         Serial.print("handle Wait next");
         Serial.println(nextStep);
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
   #endif  
 
   if (nextStep != -1) {
@@ -504,11 +503,11 @@ void handleWaitForHold(unsigned long currentTime) {
         Serial.print(currentStep);
         Serial.print("Special same button next:");
         Serial.println(nextStep);
-        delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif  
 
-      delay(1000*HOLD[currentProgram][programStep]);
-      
+      vTaskDelay(1000*HOLD[currentProgram][programStep] /portTICK_PERIOD_MS);
+      vTaskDelay(1000/portTICK_PERIOD_MS);
       blinkLed(nextStep, currentTime, HIGH);
       
       
@@ -519,18 +518,19 @@ void handleWaitForHold(unsigned long currentTime) {
         : !digitalRead(BUTTONS[nextStep % MAX_LEDS]);  // Green: button pressed
 
       if (nextButtonReady) {
+      //if (true){ 
         programStep++;
         preStep = currentStep;
+        blueidx = 1;
         currentStep = nextStep;
         currentState = BLINK_TARGET;  // Restart cycle for the new step
-        blueidx = 1;
         hold_flag = false;
          #ifdef DEBUG
           Serial.print("Finished Special same button current:");
           Serial.print(currentStep);
           Serial.print("Special same button next:");
           Serial.println(nextStep);
-          delay(500);
+          vTaskDelay(500 / portTICK_PERIOD_MS);
          #endif  
       }
       return;
@@ -542,22 +542,24 @@ void handleWaitForHold(unsigned long currentTime) {
           Serial.print(currentStep);
           Serial.print("Normal button next:");
           Serial.println(nextStep);
-          delay(500);
+          vTaskDelay(500 / portTICK_PERIOD_MS);
     #endif  
     
     setLedSolid(currentStep, HIGH);
-    delay(1000*HOLD[currentProgram][programStep]);
+    vTaskDelay(1000*HOLD[currentProgram][programStep] /portTICK_PERIOD_MS);
+    vTaskDelay(1000 /portTICK_PERIOD_MS);
     // Check current button state validity
     bool currentButtonValid = (currentStep >= RED_OFFSET) 
       ? digitalRead(BUTTONS[currentStep % MAX_LEDS])  // Red: released
       : !digitalRead(BUTTONS[currentStep % MAX_LEDS]);  // Green: pressed
     
     blinkLed(nextStep, currentTime, HIGH);
-
+    /*
     if (!currentButtonValid) {
       triggerError(currentState);
       return;
     }
+    */
 
     // Check next button initiation
     bool nextButtonInitiated = (nextStep >= RED_OFFSET)
@@ -565,6 +567,7 @@ void handleWaitForHold(unsigned long currentTime) {
       : !digitalRead(BUTTONS[nextStep % MAX_LEDS]);  // Green: pressed
 
     if (nextButtonInitiated) {
+      //if (true) {
       /*
       programStep++;
       preStep = currentStep;
@@ -578,10 +581,10 @@ void handleWaitForHold(unsigned long currentTime) {
           Serial.println(currentStep);
           Serial.print("Normal next:");
           Serial.println(nextStep);
-          delay(500);
+          vTaskDelay(500 / portTICK_PERIOD_MS);
       #endif  
     }
-  } else {
+  }else {
     blueidx=3;
     advanceStep();
   }
