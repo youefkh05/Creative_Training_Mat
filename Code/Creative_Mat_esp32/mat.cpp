@@ -790,7 +790,7 @@ void celebrateCompletion() {
       ledStates[led] = HIGH;
       digitalWrite(ALL_LEDS[led], HIGH);
     }
-    delay(flashDuration);
+    vTaskDelay(flashDuration/portTICK_PERIOD_MS);
     resetAllLEDs();
     
     // Red flash
@@ -798,12 +798,14 @@ void celebrateCompletion() {
        ledStates[led + RED_OFFSET] = HIGH;
       digitalWrite(ALL_LEDS[led + RED_OFFSET], HIGH);
     }
-    delay(flashDuration);
+    vTaskDelay(flashDuration /portTICK_PERIOD_MS);
     resetAllLEDs();
   }
 }
 
 void mat_loop(){
+
+  //yield();   // Let the ESP32 background tasks run
 
   unsigned long currentTime = millis();
         
@@ -814,11 +816,12 @@ void mat_loop(){
       case VERIFY_NEXT: handleVerifyNext(); break;
     }
           
-    mat_checkerror();
+    //mat_checkerror();
 
     #ifdef DEBUG
-      printState();
-      delay(100); // Prevent serial flooding
+      Serial.println("MAT Loop running...");
+      printState();      
+      vTaskDelay(100 /portTICK_PERIOD_MS); // Prevent serial flooding
     #endif
 
 }
