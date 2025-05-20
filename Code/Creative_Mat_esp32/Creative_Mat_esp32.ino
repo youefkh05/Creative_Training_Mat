@@ -8,6 +8,7 @@
 #include "mat.h"
 #include "oled.h"
 #include "blue.h"
+#include "esp_task_wdt.h"
 
 
 /* Global Variables *****************************************************************/
@@ -67,7 +68,15 @@ int current_screen = 0;
 
 void setup()
 {
-  //Serial.begin(115200);
+  #ifdef DEBUG
+    delay(1000);
+    Serial.begin(115200);
+    //disableCore0WDT();
+    //disableCore1WDT();
+    Serial.printf("Setup function\n");
+    
+  #endif
+
 
   OLED_init();
 
@@ -80,7 +89,7 @@ void setup()
 
   #ifdef DEBUG
     Serial.println("Start");
-    delay(500);
+    vTaskDelay(500 / portTICK_PERIOD_MS);  // Non-blocking delay
     Serial.printf("Setup complete\n");
   #endif
    
@@ -99,7 +108,7 @@ void loop()
     //* Up Button
     if (digitalRead(OLED_BUTTON_UP_PIN) == LOW) // Check if Button is pressed
     {
-      delay(10);                                  // Debounce
+      vTaskDelay(10/ portTICK_PERIOD_MS);                                  // Debounce
       if (digitalRead(OLED_BUTTON_UP_PIN) == LOW) // Check if Button is still pressed
       {
         selected = selected - 1;
@@ -118,7 +127,7 @@ void loop()
     //* Down Button
     if (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW) // Check if Button is pressed
     {
-      delay(10);                                    // Debounce
+      vTaskDelay(10/ portTICK_PERIOD_MS);                                    // Debounce
       if (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW) // Check if Button is still pressed
       {
         selected = selected + 1;
@@ -145,7 +154,7 @@ void loop()
     //* Up Button
     if (digitalRead(OLED_BUTTON_UP_PIN) == LOW) // Check if Button is pressed
     {
-      delay(10);                                  // Debounce
+      vTaskDelay(10/ portTICK_PERIOD_MS);                                  // Debounce
       if (digitalRead(OLED_BUTTON_UP_PIN) == LOW) // Check if Button is still pressed
       {
         selected2 = selected2 - 1;
@@ -164,7 +173,7 @@ void loop()
     //* Down Button
     if (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW) // Check if Button is pressed
     {
-      delay(10);                                    // Debounce
+      vTaskDelay(10 / portTICK_PERIOD_MS);  // Debounce
       if (digitalRead(OLED_BUTTON_DOWN_PIN) == LOW) // Check if Button is still pressed
       {
         selected2 = selected2 + 1;
@@ -189,7 +198,8 @@ void loop()
   //* Enter Button
   if ((digitalRead(OLED_BUTTON_SELECT_PIN) == LOW)) // Check if Button is pressed
   {
-    delay(10);                                        // Debounce
+    vTaskDelay(10 / portTICK_PERIOD_MS);  // Debounce
+                                       
     if ((digitalRead(OLED_BUTTON_SELECT_PIN) == LOW)) // Check if Button is still pressed
     {
       setProgram((selected*n_items2) + selected2, false);
@@ -371,8 +381,7 @@ void loop()
           }
           else{
             u8g2.drawStr(1, FIRST_RAW, "HOLD for");
-            sprintf(buffer, "%d", HOLD[currentProgram][programStep]);
-            strcat(buffer, " sec");
+            snprintf(buffer, sizeof(buffer), "%d sec", HOLD[currentProgram][programStep]);
             u8g2.drawStr(10, SECOND_RAW, buffer);
             u8g2.drawXBMP(SIGN, BAR+12, sign_width_big  , sign_height_big, clock_sign);
           }
@@ -391,7 +400,7 @@ void loop()
       }
 
     }
-    //delay(100);
+    //vTaskDelay(100 / portTICK_PERIOD_MS);  // Non-blocking delay
   } while (u8g2.nextPage());
 
   u8g2.setAutoPageClear(0);
