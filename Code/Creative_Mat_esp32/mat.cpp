@@ -613,8 +613,6 @@ void handleVerifyNext() {
   }
 }
 
-
-
 void mat_checkerror() {
   if(programStep<(totalSteps-1) && programStep>2){
     for (int i = (programStep-3); i < programStep; ++i){
@@ -673,7 +671,7 @@ void mat_checkerror() {
               Serial.println(programStep);
               Serial.print("currentStep:");
               Serial.println(step);
-              delay(500);
+              vTaskDelay(500 / portTICK_PERIOD_MS);
             #endif  
             return;
           }
@@ -701,6 +699,7 @@ void advanceStep() {
 
   if (programStep >= totalSteps || PROGRAMS[currentProgram][programStep] == -1) {
     celebrateCompletion();
+    //currentProgram = (currentProgram + 1) % TRAININGS;
     currentState = IDLE;     // Start in idle
     programStep = 0;
     totalSteps = MAX_STEPS;     // Will be adjusted per program
@@ -768,6 +767,16 @@ void setProgram(int programIndex, bool start) {
     Serial.println(currentProgram);
     Serial.print("Total steps");
     Serial.println(totalSteps);
+
+    Serial.print("State: ");
+    switch(currentState) {
+      case IDLE: Serial.print("IDLE"); break;
+      case BLINK_TARGET: Serial.print("BLINK_TARGET"); break;
+      case WAIT_FOR_HOLD: Serial.print("WAIT_FOR_HOLD"); break;
+      case VERIFY_NEXT: Serial.print("VERIFY_NEXT"); break;
+      case ERROR: Serial.print("ERROR"); break;
+    }
+
   #endif
 }
 
