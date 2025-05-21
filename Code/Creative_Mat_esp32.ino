@@ -68,49 +68,32 @@ int current_screen = 0;
 
 void setup()
 {
-  delay(1500);  // wait for USB serial to stabilize
+  delay(1000);  // wait for USB serial to stabilize
   #ifdef DEBUG
     delay(1000);
     Serial.begin(115200);
-    Serial.printf("Restart reason: %d\n", esp_reset_reason());
     //disableCore0WDT();
     //disableCore1WDT();
     Serial.printf("Setup function\n");
-    //esp_task_wdt_deinit();
+    esp_task_wdt_deinit();
   #endif
-  //esp_task_wdt_deinit();
-
-  Serial.begin(115200);
-  Serial.printf("Restart reason: %d\n", esp_reset_reason());
+  esp_task_wdt_deinit();
 
   delay(10); // Let system breathe
-  // Step by step check
-  Serial.println("Calling OLED_init()");
   OLED_init();
-  Serial.println("OLED done");
 
   /*Oled Config*/
-  Serial.println("Calling u8g2 setup");
-  u8g2.setColorIndex(1);
+  u8g2.setColorIndex(1); // white color
   u8g2.setBitmapMode(1);
   u8g2.begin();
-  Serial.println("u8g2 done");
-
-  Serial.println("Calling mat_init()");
   mat_init();
-  Serial.println("mat done");
-
-  Serial.println("Calling BLUE_init()");
   BLUE_init();
-  Serial.println("BLUE done");
 
   #ifdef DEBUG
     Serial.println("Start");
     vTaskDelay(500 / portTICK_PERIOD_MS);  // Non-blocking delay
     Serial.printf("Setup complete\n");
   #endif
-
-  Serial.println("Setup complete");
    
 }
 

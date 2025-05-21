@@ -1,7 +1,7 @@
 #include "mat.h"
 
 // Pin Definitions
-const int BUTTONS[] = {2, 3, 4, 5, 12, 13};  // B1-B6 (LOW when pressed)
+const int BUTTONS[] = {4, 4, 4, 4, 4, 4};  // B1-B6 (LOW when pressed)
 // 0 → LEFT_HAND, 1 → RIGHT_HAND, 2 → LEFT_KNEE, 3 → RIGHT_KNEE, 4 → LEFT_LEG 5 →RIGHT_LEG
   
 
@@ -144,25 +144,25 @@ const int PROGRAMS[TrainingPerProblem*PROBLEMS][MAX_STEPS] = {
 
 const int HOLD[TrainingPerProblem*PROBLEMS][MAX_STEPS] = {
   //problem 0
-  { 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0},
-  { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
-  { 0, 0, 0, 0, 3, 0, 3, 0,0},  
-  { 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 0 },
+  { 3, 4, 3, 3, 4, 5, 4, 6, 6, 7, 2},
+  { 2, 3, 2, 4, 3, 5, 5, 6, 4, 5, 6, 7, 2},
+  { 2, 3, 2, 4, 3, 5, 3, 6,2},  
+  { 2, 3, 3, 4, 5, 5, 3, 2, 3, 4, 4},
   
   //problem 1
-  { 0, 0, 0, 0, 0, 30, 0, 0, 5, 0, 0, 0},
-  { 0, 0, 0, 0, 0, 30, 0, 0, 5, 0, 0, 0},
-  { 0, 0, 0, 0, 7, 2, 7, 2, 0},
+  { 2, 3, 3, 5, 2, 30, 4, 2, 5, 6, 7, 2},
+  { 2, 3, 4, 3, 2, 30, 5, 6, 5, 7, 6, 2},
+  { 2, 3, 4, 2, 7, 2, 7, 2, 2},
   {0},
   
   //problem 2
-  { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
-  { 0, 0, 0, 7, 0, 0, 0, 7, 0},
-  { 0, 0, 0, 0, 0, 0, 0, 5, 0},
-  { 0, 0, 0, 0, 5, 0, 5, 0, 5, 0},
+  { 2, 3, 4, 5, 6, 5, 5, 2, 3, 5, 4, 3, 2},
+  { 2, 3, 4, 7, 6, 5, 2, 7, 3},
+  { 2, 3, 4, 4, 5, 3, 4, 5, 2},
+  { 2, 3, 4, 3, 5, 2, 5, 2, 5, 2},
   
   //problem 3
-  { 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
+  { 2, 3, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 0, 5, 0, 5, 0},
   { 0, 0, 0, 5, 0, 0, 0},
   { 0, 0, 0, 0, 5, 0, 5, 0,  0},
@@ -239,17 +239,20 @@ void printState() {
 #endif
 
 void mat_init(){
-    // Initialize all LEDs and buttons
+  // Initialize all LEDs and buttons
+  pinMode(BUTTONS[0], INPUT_PULLUP);
+
   for (int i = 0; i < MAX_LEDS; i++) {
-    pinMode(BUTTONS[i], INPUT_PULLUP);
+    
     pinMode(ALL_LEDS[i], OUTPUT);          // Green LEDs
     pinMode(ALL_LEDS[i + RED_OFFSET], OUTPUT); // Red LEDs
     digitalWrite(ALL_LEDS[i], HIGH);
-    vTaskDelay(500/ portTICK_PERIOD_MS);
+    vTaskDelay(1000/ portTICK_PERIOD_MS);
     digitalWrite(ALL_LEDS[i], LOW);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], HIGH);
-    vTaskDelay(500/ portTICK_PERIOD_MS);
+    vTaskDelay(1000/ portTICK_PERIOD_MS);
     digitalWrite(ALL_LEDS[i + RED_OFFSET], LOW);
+    Serial.printf("i=%d, ALL_LEDS[%d], ALL_LEDS[%d]\n", i, i, i + RED_OFFSET);
   }
 
   #ifdef DEBUG
@@ -513,12 +516,10 @@ void handleWaitForHold(unsigned long currentTime) {
       
 
       // Wait for button state to match next step's requirement
-      bool nextButtonReady = (nextStep >= RED_OFFSET) 
-        ? digitalRead(BUTTONS[nextStep % MAX_LEDS])  // Red: button released
-        : !digitalRead(BUTTONS[nextStep % MAX_LEDS]);  // Green: button pressed
+      bool nextButtonReady = true;
 
-      if (nextButtonReady) {
-      //if (true){ 
+      //if (nextButtonReady) {
+      if (true){ 
         programStep++;
         preStep = currentStep;
         blueidx = 1;
@@ -549,9 +550,7 @@ void handleWaitForHold(unsigned long currentTime) {
     vTaskDelay(1000*HOLD[currentProgram][programStep] /portTICK_PERIOD_MS);
     vTaskDelay(1000 /portTICK_PERIOD_MS);
     // Check current button state validity
-    bool currentButtonValid = (currentStep >= RED_OFFSET) 
-      ? digitalRead(BUTTONS[currentStep % MAX_LEDS])  // Red: released
-      : !digitalRead(BUTTONS[currentStep % MAX_LEDS]);  // Green: pressed
+    bool currentButtonValid = true;
     
     blinkLed(nextStep, currentTime, HIGH);
     /*
@@ -562,12 +561,10 @@ void handleWaitForHold(unsigned long currentTime) {
     */
 
     // Check next button initiation
-    bool nextButtonInitiated = (nextStep >= RED_OFFSET)
-      ? digitalRead(BUTTONS[nextStep % MAX_LEDS])  // Red: released
-      : !digitalRead(BUTTONS[nextStep % MAX_LEDS]);  // Green: pressed
+    bool nextButtonInitiated = true;
 
-    if (nextButtonInitiated) {
-      //if (true) {
+    //if (nextButtonInitiated) {
+    if (true) {
       /*
       programStep++;
       preStep = currentStep;
@@ -599,13 +596,11 @@ void handleVerifyNext() {
   #endif  
 
   // Verify next button is still in correct state
-  bool nextButtonOk = (nextStep >= RED_OFFSET)
-    ? (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == HIGH)
-    : (digitalRead(BUTTONS[nextStep % MAX_LEDS]) == LOW);
+  bool nextButtonOk = true;
 
   vTaskDelay(500 / portTICK_PERIOD_MS);
-  if (nextButtonOk) {
-  //if (true) {
+  //if (nextButtonOk) {
+  if (true) {
     blueidx=3;
     advanceStep();
   } else {
